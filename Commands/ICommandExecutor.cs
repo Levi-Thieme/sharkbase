@@ -4,11 +4,8 @@ using System.Text;
 
 namespace SharkBase.Commands
 {
-    public enum CommandType
+    public interface ICommandExecutor
     {
-        Insert,
-        Delete,
-        Update,
-        InsertRecord
+        void Execute(TableCommand command);
     }
 }
