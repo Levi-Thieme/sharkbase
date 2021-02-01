@@ -14,7 +14,11 @@ namespace SharkBase.Parsing
 
         public string ParseString(string value)
         {
-            return value.Substring(0, 128);
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            else if (value.Length > 128)
+                return value.Substring(0, 128);
+            return value.Trim();
         }
     }
 }
