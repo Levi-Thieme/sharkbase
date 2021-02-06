@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SharkBase.DataAccess
 {
-    public class Tables : ITables
+    public class Tables : ITables, ISchemaProvider
     {
         private ISystemStore storage;
         private List<string> tables;
@@ -32,8 +32,30 @@ namespace SharkBase.DataAccess
             tables.Remove(name);
         }
 
+        public ITable GetByName(string name)
+        {
+            if (!exists(name))
+                throw new ArgumentException($"The table, {name}, does not exist.");
+            return new Table(this.storage, name);
+        }
+
         public bool Exists(string name) => exists(name);
 
         private bool exists(string name) => tables.Contains(name);
+
+        public void AddSchema(TableSchema table)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveSchema(TableSchema table)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TableSchema GetSchema(string tableName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

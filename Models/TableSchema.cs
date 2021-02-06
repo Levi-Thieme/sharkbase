@@ -4,18 +4,18 @@ using System.Text;
 
 namespace SharkBase.DataAccess
 {
-    public class Table
+    public class TableSchema
     {
         public string Name { get; private set; }
         public IEnumerable<Column> Columns { get; private set; }
 
-        public Table(string name, IEnumerable<Column> columns)
+        public TableSchema(string name, IEnumerable<Column> columns)
         {
             this.Name = name;
             this.Columns = columns;
         }
 
-        public Table(string name)
+        public TableSchema(string name)
         {
             this.Name = name;
             this.Columns = new List<Column>();

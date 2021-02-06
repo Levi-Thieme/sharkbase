@@ -12,12 +12,17 @@ namespace SharkBase
     class Program
     {
         private static readonly string workingDirectory = Path.GetTempPath() + "/test_db";
+        private ITables tables;
+        private ISchemaProvider schemas;
 
         static void Main(string[] args)
         {
+            var program = new Program();
+            program.Initialize();
+            var parser = program.BuildParser();
+            var commandBuilder = program.BuildCommandBuilder();
+
             Console.WriteLine("Started Sharkbase");
-            var parser = BuildParser();
-            var commandBuilder = BuildCommandBuilder();
             string input = Console.ReadLine().Trim();
             while (input != "QUIT")
             {
@@ -37,19 +42,27 @@ namespace SharkBase
             Console.WriteLine("Quitting Sharkbase...");
         }
 
-        private static Parser BuildParser()
+        private void Initialize()
+        {
+            var store = new FileStore(workingDirectory);
+            var tableNames = store.GetTableNames();
+            var tables = new Tables(new FileStore(workingDirectory), tableNames);
+            this.tables = tables;
+            this.schemas = tables;
+        }
+
+        private Parser BuildParser()
         {
             var parsers = new List<IParser>();
             parsers.Add(new InsertTableParser());
             parsers.Add(new DeleteTableParser());
+            parsers.Add(new InsertRecordParser(this.schemas));
             return new Parser(parsers);
         }
 
-        private static CommandBuilder BuildCommandBuilder()
+        private CommandBuilder BuildCommandBuilder()
         {
-            var filestore = new FileStore(workingDirectory);
-            var tables = new Tables(filestore, filestore.GetTableNames());
-            return new CommandBuilder(tables);
+            return new CommandBuilder(this.tables, this.schemas);
         }
     }
 }

@@ -7,5 +7,6 @@ namespace SharkBase.DataAccess
         bool Exists(string name);
         void Create(string name, IEnumerable<Column> columns);
         void Delete(string name);
+        ITable GetByName(string name);
     }
 }

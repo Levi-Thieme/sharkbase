@@ -6,8 +6,8 @@ namespace SharkBase.DataAccess
 {
     public interface ISchemaProvider
     {
-        void AddSchema(Table table);
-        void RemoveSchema(Table table);
-        Table GetSchema(string tableName);
+        void AddSchema(TableSchema table);
+        void RemoveSchema(TableSchema table);
+        TableSchema GetSchema(string tableName);
     }
 }

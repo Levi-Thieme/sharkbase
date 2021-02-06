@@ -1,11 +1,19 @@
 ﻿using SharkBase.DataAccess;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace SharkBase.Parsing
 {
-    public class ValueParser
+    public interface IValueParser
+    {
+        public long ParseInt(string value);
+        public string ParseString(string value);
+        public object ParseValue(string value, ColumnType type);
+        public IEnumerable<object> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns);
+    }
+
+    public class ValueParser : IValueParser
     {
         public long ParseInt(string value)
         {
@@ -15,10 +23,40 @@ namespace SharkBase.Parsing
         public string ParseString(string value)
         {
             if (string.IsNullOrEmpty(value))
-                return string.Empty;
+                return string.Empty.PadRight(128);
             else if (value.Length > 128)
                 return value.Substring(0, 128);
-            return value.Trim();
+            else
+                return value.PadRight(128 - value.Length);
+        }
+
+        public object ParseValue(string value, ColumnType type)
+        {
+            if (type == ColumnType.Int64)
+                return ParseInt(value);
+            else if (type == ColumnType.Char128)
+                return ParseString(value);
+            throw new ArgumentException("The column type did not correspond to an existing column type.");
+        }
+
+        public IEnumerable<object> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns)
+        {
+            var values = new List<object>();
+            var parser = new ValueParser();
+            for (int i = 0; i < tableColumns.Count(); i++)
+            {
+                string value = columnValues.ElementAt(i);
+                var column = tableColumns.ElementAt(i);
+                try
+                {
+                    values.Add(parser.ParseValue(value, column.Type));
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException($"Unable to parse the column value, {value} given for column '{column.Name}' of type {column.Type}");
+                }
+            }
+            return values;
         }
     }
 }
