@@ -11,12 +11,6 @@ namespace SharkBase.QueryProcessing.Parsing
     public class InsertTableParser : IParser
     {
         private const string INSERT_TABLE = "INSERT TABLE";
-        private readonly ITables tables;
-
-        public InsertTableParser(ITables tables)
-        {
-            this.tables = tables;
-        }
 
         public bool IsParsable(string input) => input.StartsWith(INSERT_TABLE);
 
@@ -24,7 +18,7 @@ namespace SharkBase.QueryProcessing.Parsing
         {
             string[] tokens = Parser.TokenizeStatement(input);
             CheckSyntax(tokens);
-            return new InsertTableStatement(new InsertTableValidator(this.tables)) { Table = tokens[2], Tokens = skipToColumnDefinitions(tokens) };
+            return new InsertTableStatement(new InsertTableValidator()) { Table = tokens[2], Tokens = skipToColumnDefinitions(tokens) };
         }
 
         private void CheckSyntax(string[] tokens)
@@ -34,7 +28,6 @@ namespace SharkBase.QueryProcessing.Parsing
                 throw new ArgumentException("Insert table statement is missing a table name.");
             }
             CheckColumnDefinitionSyntax(skipToColumnDefinitions(tokens).Count());
-
         }
 
         private IEnumerable<string> skipToColumnDefinitions(IEnumerable<string> tokens) => tokens.Skip(3);

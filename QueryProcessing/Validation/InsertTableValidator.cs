@@ -7,19 +7,8 @@ namespace SharkBase.QueryProcessing.Validation
 {
     public class InsertTableValidator : IStatementValidator
     {
-        private readonly ITables tables;
-
-        public InsertTableValidator(ITables tables)
-        {
-            this.tables = tables;
-        }
-
         public void Validate(string table, IEnumerable<string> tokens)
         {
-            if (tables.Exists(table))
-            {
-                throw new ArgumentException($"The table, {table}, already exists.");
-            }
             ValidateColumnDefinitions(tokens);
         }
 

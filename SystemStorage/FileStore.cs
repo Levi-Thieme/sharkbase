@@ -1,5 +1,4 @@
-﻿using SharkBase.DataAccess;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
@@ -15,7 +14,7 @@ namespace SharkBase.SystemStorage
             this.workingDirectory = workingDirectory;
         }
 
-        public void InsertTable(string name, IEnumerable<Column> columns)
+        public void InsertTable(string name) 
         {
             File.Create(TableFilePath(name)).Dispose();
         }
@@ -24,6 +23,13 @@ namespace SharkBase.SystemStorage
         {
             if (TableExists(name))
                 File.Delete(TableFilePath(name));
+        }
+
+        internal IEnumerable<string> GetTableNames()
+        {
+            return Directory.GetFiles(workingDirectory)
+                .Where(file => file.EndsWith(TABLE_EXTENSION))
+                .Select(file => Path.GetFileNameWithoutExtension(file));
         }
 
         private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";

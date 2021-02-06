@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharkBase.DataAccess;
 using SharkBase.QueryProcessing.Parsing;
 
 namespace SharkBase.Parsing
 {
     public class Parser : IParser
     {
-        private IEnumerable<IParser> parsers;
-        private Dictionary<string, ColumnType> ColumnTypes = new Dictionary<string, ColumnType>
-        {
-            { "INT64", ColumnType.Int64 },
-            { "CHAR128", ColumnType.Char128 }
-        };
+        private readonly IEnumerable<IParser> parsers;
 
         public Parser (IEnumerable<IParser> parsers)
         {

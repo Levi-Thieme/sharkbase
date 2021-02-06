@@ -2,18 +2,22 @@
 using SharkBase.DataAccess;
 using SharkBase.Parsing;
 using SharkBase.QueryProcessing.Parsing;
+using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SharkBase
 {
     class Program
     {
+        private static readonly string workingDirectory = Path.GetTempPath() + "/test_db";
+
         static void Main(string[] args)
         {
             Console.WriteLine("Started Sharkbase");
             var parser = BuildParser();
-            var commandBuilder = new CommandBuilder();
+            var commandBuilder = BuildCommandBuilder();
             string input = Console.ReadLine().Trim();
             while (input != "QUIT")
             {
@@ -35,25 +39,17 @@ namespace SharkBase
 
         private static Parser BuildParser()
         {
-            var tables = new TestTables();
             var parsers = new List<IParser>();
-            parsers.Add(new InsertTableParser(tables));
+            parsers.Add(new InsertTableParser());
+            parsers.Add(new DeleteTableParser());
             return new Parser(parsers);
         }
 
-        private class TestTables : ITables
+        private static CommandBuilder BuildCommandBuilder()
         {
-            public List<Table> Tables { get; set; }
-
-            public void Create(string name, IEnumerable<Column> columns)
-            {
-                Tables.Add(new Table(name, columns));
-            }
-
-            public void Delete(string name) => Tables.Remove(Tables.Find(t => t.Name == name));
-
-            public bool Exists(string name) => name == "FOOD" ? true : false;
-
+            var filestore = new FileStore(workingDirectory);
+            var tables = new Tables(filestore, filestore.GetTableNames());
+            return new CommandBuilder(tables);
         }
     }
 }
