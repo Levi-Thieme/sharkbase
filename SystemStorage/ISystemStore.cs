@@ -1,8 +1,0 @@
-﻿namespace SharkBase.SystemStorage
-{
-    public interface ISystemStore
-    {
-        void InsertTable(string name);
-        void DeleteTable(string name);
-    }
-}
