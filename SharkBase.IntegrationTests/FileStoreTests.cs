@@ -39,44 +39,6 @@ namespace SharkBase.IntegrationTests
             Assert.IsFalse(File.Exists(TablePath("MYTABLE")));
         }
 
-        [TestMethod]
-        public void InsertsRecordsIntoATable()
-        {
-            File.Create(TablePath("test")).Dispose();
-            var values = new List<object>
-            {
-                21L,
-                "I like food."
-            };
-
-            for (int i = 0; i < 10000; i++)
-            {
-                store.InsertRecord("test", values);
-            }
-
-            var readValues = store.ReadRecord("test", new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, ""), new Column(ColumnType.Char128, "") }));
-
-            CollectionAssert.AreEqual(values, readValues.ToList());
-        }
-
-        [TestMethod]
-        public void memoryStreamTests()
-        {
-            var values = new List<object>
-            {
-                21L,
-                "I like food."
-            };
-            using (MemoryStream stream = new MemoryStream())
-            {
-                for(int i = 0; i < 10000; i++)
-                {
-                    stream.Write(BitConverter.GetBytes(21L));
-                }
-                store.WriteFromPosition("test", stream, 0L);
-            }
-        }
-
         private string TablePath(string name) => Path.Join(workingDirectory, name + ".table");
     }
 }

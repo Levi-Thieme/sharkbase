@@ -26,7 +26,7 @@ namespace SharkBase.Commands
         public void Execute()
         {
             var values = valueParser.ParseColumnValues(statement.ColumnValues, schema.Columns);
-            table.InsertRecord(values);
+            table.InsertRecord(new Record(values));
         }
     }
 }

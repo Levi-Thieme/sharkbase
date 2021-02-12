@@ -41,13 +41,28 @@ namespace SharkBase.SystemStorage
             }
         }
 
-        public void WriteFromPosition(string table, MemoryStream stream, long position)
+        public void Write(string table, MemoryStream stream, long offset)
         {
             using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.OpenOrCreate))
             {
-                fstream.Seek(position, SeekOrigin.Begin);
+                fstream.Seek(offset, SeekOrigin.Begin);
                 stream.WriteTo(fstream);
             }
+        }
+
+        public void Read(string table, byte[] buffer, long position, int count)
+        {
+            using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.Open))
+            {
+                fstream.Seek(position, SeekOrigin.Begin);
+                fstream.Read(buffer, 0, count);
+                fstream.Flush();
+            }
+        }
+
+        public long TableBytes(string table)
+        {
+            return new FileInfo(TableFilePath(table)).Length;
         }
 
         public IEnumerable<object> ReadRecord(string name, TableSchema schema)

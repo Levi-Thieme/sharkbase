@@ -6,6 +6,6 @@ namespace SharkBase.DataAccess
 {
     public interface ITable
     {
-        void InsertRecord(IEnumerable<object> values);
+        void InsertRecord(Record record);
     }
 }
