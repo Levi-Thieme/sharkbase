@@ -57,6 +57,17 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         }
 
         [TestMethod]
+        public void GivenAValidInputEndingWithASingleQuoteToCloseAStringLiteral_ItReturnsColumnValues()
+        {
+            var input = new List<string> { "1", "'Tacos'" };
+            var expected = new List<string> { "1", "Tacos" };
+
+            var values = parser.GetColumnValues(input.ToArray());
+
+            CollectionAssert.AreEqual(expected, values.ToList());
+        }
+
+        [TestMethod]
         public void GivenAStringLiteralIsNotClosedWithASingleQuote_ItThrowsAnException()
         {
             Assert.ThrowsException<ArgumentException>(() => parser.Parse("INSERT INTO FOOD 1 'TACOS 30"));

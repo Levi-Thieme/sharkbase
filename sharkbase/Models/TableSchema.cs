@@ -14,11 +14,5 @@ namespace SharkBase.DataAccess
             this.Name = name;
             this.Columns = columns;
         }
-
-        public TableSchema(string name)
-        {
-            this.Name = name;
-            this.Columns = new List<Column>();
-        }
     }
 }

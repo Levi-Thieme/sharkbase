@@ -1,8 +1,10 @@
 ﻿using SharkBase.DataAccess;
+using SharkBase.Models;
 using SharkBase.Parsing;
 using SharkBase.QueryProcessing.Statements;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharkBase.Commands
@@ -26,7 +28,7 @@ namespace SharkBase.Commands
         public void Execute()
         {
             var values = valueParser.ParseColumnValues(statement.ColumnValues, schema.Columns);
-            table.InsertRecord(new Record(values));
+            table.InsertRecord(new Record(values.Select(v => new Value(v))));
         }
     }
 }

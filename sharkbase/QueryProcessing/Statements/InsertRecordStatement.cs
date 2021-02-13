@@ -9,7 +9,7 @@ namespace SharkBase.QueryProcessing.Statements
         private IStatementValidator validator;
         public string Table { get; set; }
         public IEnumerable<string> Tokens { get; set; }
-        public IEnumerable<string> ColumnValues { get => Tokens.Skip(3); }
+        public IEnumerable<string> ColumnValues { get; private set; }
         
 
         public InsertRecordStatement(string table, IEnumerable<string> tokens, IStatementValidator validator)
@@ -17,6 +17,7 @@ namespace SharkBase.QueryProcessing.Statements
             this.validator = validator;
             this.Table = table;
             this.Tokens = tokens;
+            this.ColumnValues = tokens;
         }
 
         public void Validate()

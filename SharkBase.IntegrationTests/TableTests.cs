@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharkBase.DataAccess;
+using SharkBase.Models;
 using SharkBase.Parsing;
 using SharkBase.SystemStorage;
 using System;
@@ -17,7 +18,7 @@ namespace SharkBase.IntegrationTests
         private Table table;
         private TableSchema schema;
         private Record record;
-        private readonly string databaseDirectory = Path.Join(Path.GetTempPath(), "test_db");
+        private readonly string databaseDirectory = Path.Join(Path.GetTempPath(), "Integration_test_db");
 
         [TestInitialize]
         public void Initialize()
@@ -31,7 +32,7 @@ namespace SharkBase.IntegrationTests
             this.table = new Table(store, schema);
             var parser = new ValueParser();
             var pizza = parser.ParseString("Pizza");
-            record = new Record(21L, pizza, 9001L);
+            record = new Record(new List<Value> { new Value(21L), new Value(pizza), new Value(9001L) });
         }
 
         [TestCleanup]
@@ -64,9 +65,9 @@ namespace SharkBase.IntegrationTests
         {
             var expectedRecords = new List<Record> 
             { 
-                new Record(1L, "Tacos", 5L), 
-                new Record(2L, "Pizza", 8L), 
-                new Record(3L, "Steak", 16L)
+                new Record(new List<Value> { new Value(1L), new Value("Tacos"), new Value(5L) }), 
+                new Record(new List<Value> { new Value(2L), new Value("pizza"), new Value(9L) }), 
+                new Record(new List<Value> { new Value(3L), new Value("steak"), new Value(16L) })
             };
             foreach (var rec in expectedRecords)
             {

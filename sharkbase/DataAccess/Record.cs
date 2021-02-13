@@ -14,9 +14,9 @@ namespace SharkBase.DataAccess
             Values = values;
         }
 
-        public Record(params object[] values)
+        public Record(List<Value> values)
         {
-            Values = values.Select(v => new Value(v));
+            Values = values;
         }
 
         public void WriteTo(BinaryWriter writer)

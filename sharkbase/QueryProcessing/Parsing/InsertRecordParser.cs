@@ -38,8 +38,15 @@ namespace SharkBase.QueryProcessing.Parsing
             {
                 if (tokens[i].StartsWith("'"))
                 {
-                    inAString = true;
-                    startIndexOfString = i;
+                    if (tokens[i].EndsWith("'"))
+                    {
+                        values.Add(removeSingleQuotes(tokens[i]));
+                    }
+                    else
+                    {
+                        inAString = true;
+                        startIndexOfString = i;
+                    }
                 }
                 else if (tokens[i].EndsWith("'"))
                 {
@@ -70,7 +77,9 @@ namespace SharkBase.QueryProcessing.Parsing
 
         private string joinTokensWithSingleQuotesRemoved(IEnumerable<string> tokens) {
             string theString = string.Join(" ", tokens);
-            return theString.Substring(1, theString.Length - 2);
+            return removeSingleQuotes(theString);
         }
+
+        private string removeSingleQuotes(string token) => token.Substring(1, token.Length - 2);
     }
 }

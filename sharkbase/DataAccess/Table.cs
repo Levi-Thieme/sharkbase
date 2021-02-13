@@ -1,4 +1,5 @@
-﻿using SharkBase.SystemStorage;
+﻿using SharkBase.Models;
+using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -68,7 +69,7 @@ namespace SharkBase.DataAccess
                 else if (ColumnType.String == type)
                     values.Add(reader.ReadString());
             }
-            return new Record(values.ToArray());
+            return new Record(values.Select(v => new Value(v)));
         }
     }
 }

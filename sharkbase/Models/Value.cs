@@ -18,6 +18,10 @@ namespace SharkBase.Models
                 writer.Write(stringValue);
             else if (value is long longValue)
                 writer.Write(longValue);
+            else if (value is int intValue)
+                writer.Write((long)intValue);
+            else if (value is short shortValue)
+                writer.Write((long)shortValue);
             else
                 throw new ArgumentException("Value is not writable for the supported value types.");
         }

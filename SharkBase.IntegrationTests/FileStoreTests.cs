@@ -12,7 +12,7 @@ namespace SharkBase.IntegrationTests
     public class FileStoreTests
     {
         private FileStore store;
-        private readonly string workingDirectory = Path.Join(Path.GetTempPath(), "test_db");
+        private readonly string workingDirectory = Path.Join(Path.GetTempPath(), "integration_test_db");
 
         [TestInitialize]
         public void Initialize()

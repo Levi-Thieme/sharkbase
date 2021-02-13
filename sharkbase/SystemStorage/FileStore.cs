@@ -9,6 +9,7 @@ namespace SharkBase.SystemStorage
     {
         private readonly string workingDirectory;
         private const string TABLE_EXTENSION = ".table";
+        private const string SCHEMAS_EXTENSION = ".schemas";
 
         public FileStore(string workingDirectory)
         {
@@ -38,14 +39,18 @@ namespace SharkBase.SystemStorage
 
         internal IEnumerable<string> GetTableNames()
         {
+            if (!Directory.Exists(workingDirectory))
+                Directory.CreateDirectory(workingDirectory);
             return Directory.GetFiles(workingDirectory)
                 .Where(file => file.EndsWith(TABLE_EXTENSION))
                 .Select(file => Path.GetFileNameWithoutExtension(file));
         }
 
+        public string SchemaFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{SCHEMAS_EXTENSION}");
+
         private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";
         private string TableFilePath(string name) => Path.Combine(workingDirectory, TableNameWithExtension(name));
         private bool TableExists(string name) => File.Exists(TableFilePath(name));
-
+        
     }
 }

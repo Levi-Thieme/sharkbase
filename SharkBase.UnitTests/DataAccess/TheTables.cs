@@ -4,7 +4,6 @@ using SharkBase.DataAccess;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SharkBase.UnitTests.DataAccess
 {
@@ -19,7 +18,7 @@ namespace SharkBase.UnitTests.DataAccess
         public void Initialize()
         {
             storeMock = new Mock<ISystemStore>();
-            tables = new Tables(storeMock.Object, new List<string> { "existing_table" });
+            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>());
             columns = new List<Column> { new Column(ColumnType.Int64, "ID") };
         }
 
