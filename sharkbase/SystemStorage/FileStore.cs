@@ -26,60 +26,15 @@ namespace SharkBase.SystemStorage
                 File.Delete(TableFilePath(name));
         }
 
-        public void InsertRecord(string name, IEnumerable<object> values)
+        public void Append(string table, MemoryStream stream)
         {
-            using (BinaryWriter writer = new BinaryWriter(new FileStream(TableFilePath(name), FileMode.Append)))
+            using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.Append))
             {
-                foreach (object value in values)
-                {
-                    if (value is long)
-                        writer.Write((long)value);
-                    else if (value is string)
-                        writer.Write((string)value);
-                }
-                    
-            }
-        }
-
-        public void Write(string table, MemoryStream stream, long offset)
-        {
-            using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.OpenOrCreate))
-            {
-                fstream.Seek(offset, SeekOrigin.Begin);
                 stream.WriteTo(fstream);
             }
         }
 
-        public void Read(string table, byte[] buffer, long position, int count)
-        {
-            using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.Open))
-            {
-                fstream.Seek(position, SeekOrigin.Begin);
-                fstream.Read(buffer, 0, count);
-                fstream.Flush();
-            }
-        }
-
-        public long TableBytes(string table)
-        {
-            return new FileInfo(TableFilePath(table)).Length;
-        }
-
-        public IEnumerable<object> ReadRecord(string name, TableSchema schema)
-        {
-            var values = new List<object>();
-            using (BinaryReader reader = new BinaryReader(new FileStream(TableFilePath(name), FileMode.Open)))
-            {
-                foreach (var column in schema.Columns)
-                {
-                    if (column.Type == ColumnType.Int64)
-                        values.Add(reader.ReadInt64());
-                    else if (column.Type == ColumnType.Char128)
-                        values.Add(reader.ReadString());
-                }
-            }
-            return values;
-        }
+        public Stream GetReadStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
 
         internal IEnumerable<string> GetTableNames()
         {

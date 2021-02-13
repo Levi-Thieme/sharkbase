@@ -22,19 +22,14 @@ namespace SharkBase.Parsing
 
         public string ParseString(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                return string.Empty.PadRight(128);
-            else if (value.Length > 128)
-                return value.Substring(0, 128);
-            else
-                return value.PadRight(128 - value.Length);
+            return string.IsNullOrEmpty(value) ? string.Empty : value;
         }
 
         public object ParseValue(string value, ColumnType type)
         {
             if (type == ColumnType.Int64)
                 return ParseInt(value);
-            else if (type == ColumnType.Char128)
+            else if (type == ColumnType.String)
                 return ParseString(value);
             throw new ArgumentException("The column type did not correspond to an existing column type.");
         }

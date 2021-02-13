@@ -11,21 +11,11 @@ namespace SharkBase.DataAccess
     {
         private ISystemStore store;
         private TableSchema schema;
-        private string name;
-        private long position = 0;
-
-        public Table(ISystemStore store, string name)
-        {
-            this.store = store;
-            this.name = name;
-            position = store.TableBytes(schema.Name);
-        }
 
         public Table(ISystemStore store, TableSchema schema)
         {
             this.store = store;
             this.schema = schema;
-            position = store.TableBytes(schema.Name);
         }
 
         public void InsertRecord(Record record)
@@ -34,78 +24,51 @@ namespace SharkBase.DataAccess
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
-                    writeRecord(writer, record);
-                    store.Write(schema.Name, stream, position);
-                    position += getRecordByteCount();
+                    record.WriteTo(writer);
+                    store.Append(schema.Name, stream);
                 }
             }
         }
 
-        private void writeRecord(BinaryWriter writer, Record record)
+        public Record ReadRecord()
         {
-            for (int i = 0; i < schema.Columns.Count(); i++)
+            using (var stream = store.GetReadStream(schema.Name))
             {
-                var column = schema.Columns.ElementAt(i);
-                var value = record.Values.ElementAt(i);
-                if (ColumnType.Int64 == column.Type)
-                    writer.Write((long)value);
-                else if (ColumnType.Char128 == column.Type)
-                    writer.Write((string)value);
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
+                {
+                    return readRecordFromStream(reader);
+                }
             }
         }
 
-        public IEnumerable<Record> ReadFirstNRecord(int n)
+        public IEnumerable<Record> ReadAllRecords()
         {
-            int byteCount = getRecordByteCount();
-            int totalBytesToRead = byteCount * n;
-            byte[] buffer = new byte[totalBytesToRead];
-
-            store.Read(schema.Name, buffer, 0, totalBytesToRead);
-
-            var records = new List<Record>();
-            using (BinaryReader reader = new BinaryReader(new MemoryStream(buffer)))
+            List<Record> records = new List<Record>();
+            using (var stream = store.GetReadStream(schema.Name))
             {
-                for (int i = 0; i < n; i++)
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
-                    records.Add(readBinaryRecord(reader));
+                    var streamLength = reader.BaseStream.Length;
+                    while (reader.BaseStream.Position != streamLength)
+                    {
+                        records.Add(readRecordFromStream(reader));
+                    }
                 }
             }
             return records;
         }
 
-        public IEnumerable<Record> ReadAllRecords()
-        {
-            return ReadFirstNRecord((int)store.TableBytes(schema.Name) / getRecordByteCount());
-        }
-
-        private Record readBinaryRecord(BinaryReader reader)
+        private Record readRecordFromStream(BinaryReader reader)
         {
             var values = new List<object>();
-            foreach (var column in schema.Columns)
+            foreach (var type in schema.Columns.Select(c => c.Type))
             {
-                if (column.Type == ColumnType.Int64)
+                if (ColumnType.Int64 == type)
                     values.Add(reader.ReadInt64());
-                else if (column.Type == ColumnType.Char128)
+                else if (ColumnType.String == type)
                     values.Add(reader.ReadString());
             }
-            return new Record(values);
+            return new Record(values.ToArray());
         }
-
-        public long RecordCount()
-        {
-            long bytes = store.TableBytes(schema.Name);
-            return bytes / getRecordByteCount();
-        }
-
-        private int getRecordByteCount()
-        {
-            return schema.Columns.Select(c => byteCounts[c.Type]).Sum();
-        }
-
-        private Dictionary<ColumnType, int> byteCounts = new Dictionary<ColumnType, int>()
-        {
-            { ColumnType.Int64, 8 },
-            { ColumnType.Char128, 128 }
-        };
     }
 }

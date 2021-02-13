@@ -36,7 +36,7 @@ namespace SharkBase.DataAccess
         {
             if (!exists(name))
                 throw new ArgumentException($"The table, {name}, does not exist.");
-            return new Table(this.storage, name);
+            return new Table(this.storage, new TableSchema(name));
         }
 
         public bool Exists(string name) => exists(name);

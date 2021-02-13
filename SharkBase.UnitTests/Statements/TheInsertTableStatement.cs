@@ -12,7 +12,7 @@ namespace SharkBase.UnitTests.Statements
     public class TheInsertTableStatement
     {
         private Mock<IStatementValidator> validatorMock;
-        private List<string> tokens = new List<string> { "INT64", "ID", "CHAR128", "NAME" };
+        private List<string> tokens = new List<string> { "INT64", "ID", "STRING", "NAME" };
         private InsertTableStatement statement;
 
         [TestInitialize]
@@ -36,7 +36,7 @@ namespace SharkBase.UnitTests.Statements
             var expectedColumnDefinitions = new List<Column>
             {
                 new Column(ColumnType.Int64, "ID"),
-                new Column(ColumnType.Char128, "NAME")
+                new Column(ColumnType.String, "NAME")
             };
             var statement = new InsertTableStatement(validatorMock.Object) { Table = "test", Tokens = tokens };
 

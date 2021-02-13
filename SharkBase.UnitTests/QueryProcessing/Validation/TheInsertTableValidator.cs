@@ -19,7 +19,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Validation
         [TestMethod]
         public void GivenAStatementWithNonexistingTypes_ItThrowsAnException()
         {
-            Assert.ThrowsException<ArgumentException>(() => validator.Validate("FOOD", new List<string> { "STRING", "NAME" }));
+            Assert.ThrowsException<ArgumentException>(() => validator.Validate("FOOD", new List<string> { "INVALID_TYPE", "NAME" }));
         }
     }
 }

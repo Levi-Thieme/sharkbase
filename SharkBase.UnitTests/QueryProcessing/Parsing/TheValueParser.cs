@@ -28,9 +28,9 @@ namespace SharkBase.UnitTests
         }
 
         [TestMethod]
-        public void GivenANull_WhenParsingAString_ItReturnsAnEmptyStringWithLength128()
+        public void GivenANull_WhenParsingAString_ItReturnsAnEmptyString()
         {
-            Assert.AreEqual(string.Empty.PadRight(128), parser.ParseString(null));
+            Assert.AreEqual(string.Empty, parser.ParseString(null));
         }
     }
 }

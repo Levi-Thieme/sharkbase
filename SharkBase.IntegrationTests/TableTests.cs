@@ -5,6 +5,7 @@ using SharkBase.SystemStorage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -16,12 +17,15 @@ namespace SharkBase.IntegrationTests
         private Table table;
         private TableSchema schema;
         private Record record;
+        private readonly string databaseDirectory = Path.Join(Path.GetTempPath(), "test_db");
 
         [TestInitialize]
         public void Initialize()
         {
-            schema = new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, "ID"), new Column(ColumnType.Char128, "NAME"), new Column(ColumnType.Int64, "COST") });
-            var store = new FileStore("C:/Users/signo/Downloads/test_db");
+            if (!Directory.Exists(databaseDirectory))
+                Directory.CreateDirectory(databaseDirectory);
+            schema = new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, "ID"), new Column(ColumnType.String, "NAME"), new Column(ColumnType.Int64, "COST") });
+            var store = new FileStore(databaseDirectory);
             store.DeleteTable("test");
             store.InsertTable("test");
             this.table = new Table(store, schema);
@@ -30,43 +34,50 @@ namespace SharkBase.IntegrationTests
             record = new Record(21L, pizza, 9001L);
         }
 
+        [TestCleanup]
+        public void Cleanup()
+        {
+            Directory.Delete(databaseDirectory, true);
+        }
+
         [TestMethod]
         public void WritesRecords()
         {
-            int count = 2;
-            
-            for (int i = 0; i < count; i++)
-                table.InsertRecord(record);
+            table.InsertRecord(record);
 
-            Assert.AreEqual(count, table.RecordCount());
+            long length = new FileInfo(tablePath("test")).Length;
+            Assert.AreEqual(22, length);
         }
 
         [TestMethod]
-        public void WritesAndReadsRecords()
+        public void ReadsARecord()
         {
             table.InsertRecord(record);
 
-            var readRecords = table.ReadFirstNRecord(1);
+            var readRecord = table.ReadRecord();
 
-            CollectionAssert.AreEqual(record.Values.ToList(), readRecords.ElementAt(0).Values.ToList());
+            Assert.AreEqual(record, readRecord);
         }
 
         [TestMethod]
-        public void WritesReadAndWrites()
+        public void ReadsAllRecords()
         {
-            int count = 10;
+            var expectedRecords = new List<Record> 
+            { 
+                new Record(1L, "Tacos", 5L), 
+                new Record(2L, "Pizza", 8L), 
+                new Record(3L, "Steak", 16L)
+            };
+            foreach (var rec in expectedRecords)
+            {
+                table.InsertRecord(rec);
+            }
 
-            for (int i = 0; i < count; i++)
-                table.InsertRecord(record);
+            var actualRecords = table.ReadAllRecords();
 
-            _ = table.ReadFirstNRecord(count);
-
-            for (int i = 0; i < count; i++)
-                table.InsertRecord(record);
-
-            var allRecords = table.ReadAllRecords();
-
-            Assert.AreEqual(20, allRecords.Count());
+            CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
         }
+
+        private string tablePath(string name) => Path.Combine(databaseDirectory, name + ".table");
     }
 }

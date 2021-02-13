@@ -20,7 +20,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestMethod]
         public void GivenAnInputStartingWith_INSERT_TABLE_ItIsParsable()
         {
-            string input = "INSERT TABLE FOOD INT64 ID CHAR128 NAME";
+            string input = "INSERT TABLE FOOD INT64 ID STRING NAME";
 
             Assert.IsTrue(parser.IsParsable(input));
         }
@@ -56,9 +56,9 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestMethod]
         public void ReturnsAStatementWithColumnDefinitionTokens()
         {
-            var expected = new List<string> { "INT64", "ID", "CHAR128", "NAME" };
+            var expected = new List<string> { "INT64", "ID", "STRING", "NAME" };
 
-            IStatement statement = parser.Parse("INSERT TABLE FOOD INT64 ID CHAR128 NAME");
+            IStatement statement = parser.Parse("INSERT TABLE FOOD INT64 ID STRING NAME");
 
             CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
         }
