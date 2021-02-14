@@ -2,6 +2,7 @@
 using Moq;
 using SharkBase.QueryProcessing.Statements;
 using SharkBase.QueryProcessing.Validation;
+using System.Collections.Generic;
 
 namespace SharkBase.UnitTests.Statements
 {
@@ -12,7 +13,7 @@ namespace SharkBase.UnitTests.Statements
         public void WhenValidating_ItInvokesTheValidator()
         {
             var validatorMock = new Mock<IStatementValidator>();
-            var statement = new SelectStatement(validatorMock.Object);
+            var statement = new SelectStatement(validatorMock.Object, "test", new List<string>());
 
             statement.Validate();
 

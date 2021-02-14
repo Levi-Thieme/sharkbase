@@ -1,4 +1,5 @@
-﻿using SharkBase.Parsing;
+﻿using SharkBase.DataAccess;
+using SharkBase.Parsing;
 using SharkBase.QueryProcessing.Statements;
 using SharkBase.QueryProcessing.Validation;
 using System;
@@ -10,12 +11,18 @@ namespace SharkBase.QueryProcessing.Parsing
     public class SelectParser : IParser
     {
         private const string SELECT_FROM = "SELECT FROM";
+        private readonly ISchemaProvider schemaProvider;
 
         public bool IsParsable(string input) => input.StartsWith(SELECT_FROM);
 
+        public SelectParser(ISchemaProvider schemaProvider)
+        {
+            this.schemaProvider = schemaProvider;
+        }
+
         public IStatement Parse(string input)
         {
-            string[] tokens = Parser.TokenizeStatement(input);
+            string[] tokens = Parser.TokenizeStatement(string.Join(" ", input.Split("=")));
             var whereClauseTokens = new List<string>();
             if (tokens.Length < 3)
                 throw new ArgumentException("A table name must be provided for the select query.");
@@ -25,7 +32,7 @@ namespace SharkBase.QueryProcessing.Parsing
                 whereClauseTokens.RemoveAll(token => token == "=");
                 whereClauseTokens = whereClauseTokens.SelectMany(token => token.Split("=")).Where(token => !string.IsNullOrEmpty(token?.Trim())).ToList();
             }
-            return new SelectStatement(new SelectValidator(), tokens[2], whereClauseTokens);
+            return new SelectStatement(new SelectValidator(this.schemaProvider), tokens[2], whereClauseTokens);
         }
 
         private IEnumerable<string> parseWhereClause(IEnumerable<string> tokens)

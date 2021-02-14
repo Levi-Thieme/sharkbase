@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using SharkBase.DataAccess;
 using SharkBase.QueryProcessing.Parsing;
 using System;
 using System.Collections.Generic;
@@ -15,7 +17,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestInitialize]
         public void Initialize()
         {
-            this.parser = new SelectParser();
+            this.parser = new SelectParser(new Mock<ISchemaProvider>().Object);
         }
 
         [TestMethod]

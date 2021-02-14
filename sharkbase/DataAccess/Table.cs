@@ -1,6 +1,5 @@
 ﻿using SharkBase.Models;
 using SharkBase.SystemStorage;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,8 @@ namespace SharkBase.DataAccess
     public class Table : ITable
     {
         private ISystemStore store;
-        private TableSchema schema;
+        private readonly TableSchema schema;
+        public TableSchema Schema => this.schema;
 
         public Table(ISystemStore store, TableSchema schema)
         {
