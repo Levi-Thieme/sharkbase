@@ -2,6 +2,7 @@
 using SharkBase.QueryProcessing.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharkBase.UnitTests.QueryProcessing.Parsing
@@ -41,6 +42,39 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
             var statement = parser.Parse("SELECT FROM FOOD");
 
             Assert.AreEqual("FOOD", statement.Table);
+        }
+
+        [TestMethod]
+        public void GivenTheInputHasAWhereClause_ItRequiresAtLeastOneSelectionCriteria()
+        {
+            Assert.ThrowsException<ArgumentException>(() => parser.Parse("SELECT FROM FOOD WHERE"));
+        }
+
+        [TestMethod]
+        public void GivenTheInputHasAWhereClause_ItReturnsAStatementWithTheColumnNameAndValueTokens()
+        {
+            var expectedTokens = new List<string> { "NAME", "TACOS" };
+            var statement = parser.Parse("SELECT FROM FOOD WHERE NAME =   TACOS");
+
+            CollectionAssert.AreEqual(expectedTokens, statement.Tokens.ToList());
+        }
+
+        [TestMethod]
+        public void GivenTheInputHasAWhereClauseWithNoSpaceBetweenTheEqualSign_ItReturnsAStatementWithTheColumnNameAndValueTokens()
+        {
+            var expectedTokens = new List<string> { "NAME", "TACOS" };
+            var statement = parser.Parse("SELECT FROM FOOD WHERE NAME=TACOS");
+
+            CollectionAssert.AreEqual(expectedTokens, statement.Tokens.ToList());
+        }
+
+        [TestMethod]
+        public void GivenTheInputHasAWhereClauseWithSpaceOnOneSideOfTheEqualSign_ItReturnsAStatementWithTheColumnNameAndValueTokens()
+        {
+            var expectedTokens = new List<string> { "NAME", "TACOS" };
+            var statement = parser.Parse("SELECT FROM FOOD WHERE NAME= TACOS");
+
+            CollectionAssert.AreEqual(expectedTokens, statement.Tokens.ToList());
         }
     }
 }

@@ -9,9 +9,11 @@ namespace SharkBase.QueryProcessing.Statements
         public IEnumerable<string> Tokens { get; set; }
         private IStatementValidator validator;
 
-        public SelectStatement(IStatementValidator validator)
+        public SelectStatement(IStatementValidator validator, string table, IEnumerable<string> tokens)
         {
             this.validator = validator;
+            this.Table = table;
+            this.Tokens = tokens;
         }
 
         public void Validate() => validator.Validate(Table, Tokens);

@@ -4,7 +4,6 @@ using SharkBase.DataAccess;
 using SharkBase.QueryProcessing.Validation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SharkBase.UnitTests.QueryProcessing.Validation
 {
