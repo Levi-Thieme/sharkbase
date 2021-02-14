@@ -15,7 +15,7 @@ namespace SharkBase.QueryProcessing.Parsing
         {
             string[] tokens = Parser.TokenizeStatement(input);
             checkSyntax(tokens);
-            return new DeleteTableStatement(tokens[2], new DeleteTableValidator());
+            return new DeleteTableStatement(tokens[2], new AlwaysValidValidator());
         }
 
         private void checkSyntax(string[] tokens)

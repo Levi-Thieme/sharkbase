@@ -4,12 +4,14 @@ using SharkBase.QueryProcessing.Validation;
 namespace SharkBase.UnitTests.QueryProcessing.Validation
 {
     [TestClass]
-    public class TheDeleteTableValidator
+    public class TheAlwaysValidValidator
     {
         [TestMethod]
-        public void WhenValidating_DoesNotThrowAnException()
+        public void IsAlwaysValid()
         {
-            var validator = new DeleteTableValidator();
+            var validator = new AlwaysValidValidator();
+
+            validator.Validate(null, null);
         }
     }
 }

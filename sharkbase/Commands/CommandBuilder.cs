@@ -36,6 +36,10 @@ namespace SharkBase.Commands
                     new ValueParser()
                 );
             }
+            else if (statement is SelectStatement selectStatement)
+            {
+                return new SelectCommand(selectStatement, tables.GetByName(selectStatement.Table));
+            }
             throw new ArgumentException("The provided statement does not correspond to an existing Command.");
         }
     }

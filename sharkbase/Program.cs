@@ -76,6 +76,7 @@ namespace SharkBase
             parsers.Add(new InsertTableParser());
             parsers.Add(new DeleteTableParser());
             parsers.Add(new InsertRecordParser(this.schemas));
+            parsers.Add(new SelectParser());
             return new Parser(parsers);
         }
 

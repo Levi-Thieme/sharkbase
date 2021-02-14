@@ -37,5 +37,10 @@ namespace SharkBase.Models
         {
             return this.value.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 }
