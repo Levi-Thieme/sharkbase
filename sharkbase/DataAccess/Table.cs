@@ -1,5 +1,6 @@
 ﻿using SharkBase.Models;
 using SharkBase.SystemStorage;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,12 +12,14 @@ namespace SharkBase.DataAccess
     {
         private ISystemStore store;
         private readonly TableSchema schema;
+        private readonly Index index;
         public TableSchema Schema => this.schema;
 
-        public Table(ISystemStore store, TableSchema schema)
+        public Table(ISystemStore store, TableSchema schema, DataAccess.Index index)
         {
             this.store = store;
             this.schema = schema;
+            this.index = index;
         }
 
         public void InsertRecord(Record record)
@@ -25,8 +28,11 @@ namespace SharkBase.DataAccess
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
+                    string guid = Guid.NewGuid().ToString();
+                    writer.Write(guid);
                     record.WriteTo(writer);
-                    store.Append(schema.Name, stream);
+                    long recordOffset = store.Append(schema.Name, stream);
+                    index.Add(guid, recordOffset);
                 }
             }
         }
@@ -50,7 +56,7 @@ namespace SharkBase.DataAccess
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
                     var streamLength = reader.BaseStream.Length;
-                    while (reader.BaseStream.Position != streamLength)
+                    while (reader.BaseStream.Position < streamLength)
                     {
                         records.Add(readRecordFromStream(reader));
                     }
@@ -62,6 +68,7 @@ namespace SharkBase.DataAccess
         private Record readRecordFromStream(BinaryReader reader)
         {
             var values = new List<object>();
+            values.Add(reader.ReadString());
             foreach (var type in schema.Columns.Select(c => c.Type))
             {
                 if (ColumnType.Int64 == type)

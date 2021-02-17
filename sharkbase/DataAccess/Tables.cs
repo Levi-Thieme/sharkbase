@@ -10,12 +10,14 @@ namespace SharkBase.DataAccess
         private ISystemStore storage;
         private List<string> tables;
         private List<TableSchema> schemas;
+        private List<DataAccess.Index> indices;
 
-        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas)
+        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<DataAccess.Index> indices)
         {
             this.storage = storage;
             this.tables = tables.ToList();
             this.schemas = schemas.ToList();
+            this.indices = indices.ToList();
         }
 
         public void Create(string name, IEnumerable<Column> columns)
@@ -23,6 +25,7 @@ namespace SharkBase.DataAccess
             if (exists(name))
                 throw new ArgumentException($"The table, {name}, already exists.");
             schemas.Add(new TableSchema(name, columns));
+            indices.Add(new Index(name, new Dictionary<string, long>()));
             storage.InsertTable(name);
             tables.Add(name);
         }
@@ -32,6 +35,7 @@ namespace SharkBase.DataAccess
             if (!exists(name))
                 throw new ArgumentException($"The table, {name}, does not exist.");
             schemas.RemoveAll(schema => schema.Name == name);
+            indices.RemoveAll(i => i.Table == name);
             storage.DeleteTable(name);
             tables.Remove(name);
         }
@@ -40,8 +44,16 @@ namespace SharkBase.DataAccess
         {
             if (!exists(name))
                 throw new ArgumentException($"The table, {name}, does not exist.");
-            return new Table(this.storage, getSchema(name));
+            var index = this.indices.FirstOrDefault(i => i.Table == name);
+            if (index == null)
+            {
+                index = new Index(name, new Dictionary<string, long>());
+                this.indices.Add(index);
+            }
+            return new Table(this.storage, getSchema(name), index);
         }
+
+        public IEnumerable<Index> GetIndices() => this.indices.ToList();
 
         public IEnumerable<TableSchema> GetAllSchemas() => this.schemas;
 

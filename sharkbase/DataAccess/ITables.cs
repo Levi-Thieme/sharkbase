@@ -8,5 +8,6 @@ namespace SharkBase.DataAccess
         void Create(string name, IEnumerable<Column> columns);
         void Delete(string name);
         ITable GetByName(string name);
+        IEnumerable<Index> GetIndices();
     }
 }

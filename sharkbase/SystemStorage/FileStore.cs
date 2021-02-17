@@ -10,6 +10,7 @@ namespace SharkBase.SystemStorage
         private readonly string workingDirectory;
         private const string TABLE_EXTENSION = ".table";
         private const string SCHEMAS_EXTENSION = ".schemas";
+        private const string INDEX_EXTENSION = ".index";
 
         public FileStore(string workingDirectory)
         {
@@ -27,11 +28,13 @@ namespace SharkBase.SystemStorage
                 File.Delete(TableFilePath(name));
         }
 
-        public void Append(string table, MemoryStream stream)
+        public long Append(string table, MemoryStream stream)
         {
             using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.Append))
             {
+                long startPosition = fstream.Position;
                 stream.WriteTo(fstream);
+                return startPosition;
             }
         }
 
@@ -47,6 +50,7 @@ namespace SharkBase.SystemStorage
         }
 
         public string SchemaFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{SCHEMAS_EXTENSION}");
+        public string IndexFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{INDEX_EXTENSION}");
 
         private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";
         private string TableFilePath(string name) => Path.Combine(workingDirectory, TableNameWithExtension(name));

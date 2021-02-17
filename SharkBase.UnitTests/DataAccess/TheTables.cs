@@ -18,7 +18,7 @@ namespace SharkBase.UnitTests.DataAccess
         public void Initialize()
         {
             storeMock = new Mock<ISystemStore>();
-            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>());
+            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>(), new List<SharkBase.DataAccess.Index>());
             columns = new List<Column> { new Column(ColumnType.Int64, "ID") };
         }
 

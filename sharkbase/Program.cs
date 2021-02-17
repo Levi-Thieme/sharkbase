@@ -42,6 +42,7 @@ namespace SharkBase
                 input = Console.ReadLine().Trim();
             }
             program.WriteTableSchemas(Path.Join(workingDirectory, $"test_db.schemas") , program.schemas.GetAllSchemas());
+            program.WriteTableIndices(Path.Join(workingDirectory, "test_db.index"), program.tables.GetIndices());
             Console.WriteLine("Quitting Sharkbase...");
         }
 
@@ -50,7 +51,7 @@ namespace SharkBase
             var store = new FileStore(workingDirectory);
             var tableSchemas = GetTableSchema(store.SchemaFilePath("test_db"));
             var tableNames = store.GetTableNames();
-            var tables = new Tables(new FileStore(workingDirectory), tableNames, tableSchemas);
+            var tables = new Tables(new FileStore(workingDirectory), tableNames, tableSchemas, GetIndices(store.IndexFilePath("test_db")));
             this.tables = tables;
             this.schemas = tables;
         }
@@ -68,6 +69,21 @@ namespace SharkBase
         private void WriteTableSchemas(string filepath, IEnumerable<TableSchema> schemas)
         {
             File.WriteAllText(filepath, JsonConvert.SerializeObject(schemas), Encoding.UTF8);
+        }
+
+        private IEnumerable<DataAccess.Index> GetIndices(string filepath)
+        {
+            if (!File.Exists(filepath))
+                return new List<DataAccess.Index>();
+            string text = File.ReadAllText(filepath);
+            if (string.IsNullOrEmpty(text))
+                return new List<DataAccess.Index>();
+            return JsonConvert.DeserializeObject<IEnumerable<DataAccess.Index>>(text);
+        }
+
+        private void WriteTableIndices(string filepath, IEnumerable<DataAccess.Index> indices)
+        {
+            File.WriteAllText(filepath, JsonConvert.SerializeObject(indices), Encoding.UTF8);
         }
 
         private Parser BuildParser()

@@ -29,7 +29,7 @@ namespace SharkBase.IntegrationTests
             var store = new FileStore(databaseDirectory);
             store.DeleteTable("test");
             store.InsertTable("test");
-            this.table = new Table(store, schema);
+            this.table = new Table(store, schema, new DataAccess.Index("test", new Dictionary<string, long>()));
             var parser = new ValueParser();
             var pizza = parser.ParseString("Pizza");
             record = new Record(new List<Value> { new Value(21L), new Value(pizza), new Value(9001L) });
@@ -77,6 +77,12 @@ namespace SharkBase.IntegrationTests
             var actualRecords = table.ReadAllRecords();
 
             CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
+        }
+
+        [TestMethod]
+        public void DeletesARecord()
+        {
+
         }
 
         private string tablePath(string name) => Path.Combine(databaseDirectory, name + ".table");
