@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SharkBase.DataAccess
 {
@@ -10,5 +9,6 @@ namespace SharkBase.DataAccess
         void InsertRecord(Record record);
         Record ReadRecord();
         IEnumerable<Record> ReadAllRecords();
+        Guid GetUniqueId();
     }
 }

@@ -11,6 +11,7 @@ namespace SharkBase.UnitTests.DataAccess
     public class TheTables
     {
         private Mock<ISystemStore> storeMock;
+        private Mock<IGenerateId> mockIdGenerator;
         private Tables tables;
         private List<Column> columns;
 
@@ -18,7 +19,9 @@ namespace SharkBase.UnitTests.DataAccess
         public void Initialize()
         {
             storeMock = new Mock<ISystemStore>();
-            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>(), new List<SharkBase.DataAccess.Index>());
+            mockIdGenerator = new Mock<IGenerateId>();
+            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>(), 
+                new List<SharkBase.DataAccess.Index>(), mockIdGenerator.Object);
             columns = new List<Column> { new Column(ColumnType.Int64, "ID") };
         }
 

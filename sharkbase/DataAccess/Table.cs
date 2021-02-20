@@ -13,13 +13,15 @@ namespace SharkBase.DataAccess
         private ISystemStore store;
         private readonly TableSchema schema;
         private readonly Index index;
+        private IGenerateId idGenerator;
         public TableSchema Schema => this.schema;
 
-        public Table(ISystemStore store, TableSchema schema, DataAccess.Index index)
+        public Table(ISystemStore store, TableSchema schema, DataAccess.Index index, IGenerateId idGenerator)
         {
             this.store = store;
             this.schema = schema;
             this.index = index;
+            this.idGenerator = idGenerator;
         }
 
         public void InsertRecord(Record record)
@@ -28,7 +30,7 @@ namespace SharkBase.DataAccess
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
-                    string guid = Guid.NewGuid().ToString();
+                    string guid = GetUniqueId().ToString();
                     writer.Write(guid);
                     record.WriteTo(writer);
                     long recordOffset = store.Append(schema.Name, stream);
@@ -78,5 +80,7 @@ namespace SharkBase.DataAccess
             }
             return new Record(values.Select(v => new Value(v)));
         }
+
+        public Guid GetUniqueId() => this.idGenerator.GetUniqueId();
     }
 }

@@ -11,13 +11,15 @@ namespace SharkBase.DataAccess
         private List<string> tables;
         private List<TableSchema> schemas;
         private List<DataAccess.Index> indices;
+        private IGenerateId idGenerator;
 
-        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<DataAccess.Index> indices)
+        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<DataAccess.Index> indices, IGenerateId idGenerator)
         {
             this.storage = storage;
             this.tables = tables.ToList();
             this.schemas = schemas.ToList();
             this.indices = indices.ToList();
+            this.idGenerator = idGenerator;
         }
 
         public void Create(string name, IEnumerable<Column> columns)
@@ -50,7 +52,7 @@ namespace SharkBase.DataAccess
                 index = new Index(name, new Dictionary<string, long>());
                 this.indices.Add(index);
             }
-            return new Table(this.storage, getSchema(name), index);
+            return new Table(this.storage, getSchema(name), index, idGenerator);
         }
 
         public IEnumerable<Index> GetIndices() => this.indices.ToList();

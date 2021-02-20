@@ -22,6 +22,8 @@ namespace SharkBase.Models
                 writer.Write((long)intValue);
             else if (value is short shortValue)
                 writer.Write((long)shortValue);
+            else if (value is Guid)
+                writer.Write(value.ToString());
             else
                 throw new ArgumentException("Value is not writable for the supported value types.");
         }

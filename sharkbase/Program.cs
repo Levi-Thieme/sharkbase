@@ -51,7 +51,7 @@ namespace SharkBase
             var store = new FileStore(workingDirectory);
             var tableSchemas = GetTableSchema(store.SchemaFilePath("test_db"));
             var tableNames = store.GetTableNames();
-            var tables = new Tables(new FileStore(workingDirectory), tableNames, tableSchemas, GetIndices(store.IndexFilePath("test_db")));
+            var tables = new Tables(new FileStore(workingDirectory), tableNames, tableSchemas, GetIndices(store.IndexFilePath("test_db")), new IdGenerator());
             this.tables = tables;
             this.schemas = tables;
         }
