@@ -37,7 +37,7 @@ namespace SharkBase
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine($"{e.Message}{Environment.NewLine}{e.StackTrace}");
                 }
                 input = Console.ReadLine().Trim();
             }
@@ -93,6 +93,7 @@ namespace SharkBase
             parsers.Add(new DeleteTableParser());
             parsers.Add(new InsertRecordParser(this.schemas));
             parsers.Add(new SelectParser(this.schemas));
+            parsers.Add(new DeleteRecordParser(this.schemas));
             return new Parser(parsers);
         }
 

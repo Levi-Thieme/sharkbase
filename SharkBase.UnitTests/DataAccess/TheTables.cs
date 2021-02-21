@@ -14,6 +14,7 @@ namespace SharkBase.UnitTests.DataAccess
         private Mock<IGenerateId> mockIdGenerator;
         private Tables tables;
         private List<Column> columns;
+        private TableSchema expectedSchema;
 
         [TestInitialize]
         public void Initialize()
@@ -22,7 +23,16 @@ namespace SharkBase.UnitTests.DataAccess
             mockIdGenerator = new Mock<IGenerateId>();
             tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>(), 
                 new List<SharkBase.DataAccess.Index>(), mockIdGenerator.Object);
-            columns = new List<Column> { new Column(ColumnType.Int64, "ID") };
+            columns = new List<Column> { new Column(ColumnType.Int64, "cost") };
+            expectedSchema = new TableSchema(
+               "test",
+               new List<Column>
+               {
+                    new Column(ColumnType.String, "ID"),
+                    new Column(ColumnType.String, "DELETED"),
+                    new Column(ColumnType.Int64, "cost")
+               }
+           );
         }
 
         [TestMethod]
@@ -31,6 +41,14 @@ namespace SharkBase.UnitTests.DataAccess
             tables.Create("test", columns);
             
             storeMock.Verify(store => store.InsertTable("test"), Times.Once);
+        }
+
+        [TestMethod]
+        public void WhenCreatingATable_ItAddsItSchemaWithDefaultColumns()
+        {
+            tables.Create("test", columns);
+
+            Assert.IsTrue(tables.GetSchema("test").Equals(expectedSchema));
         }
 
         [TestMethod]

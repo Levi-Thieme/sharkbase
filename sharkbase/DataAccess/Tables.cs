@@ -12,6 +12,11 @@ namespace SharkBase.DataAccess
         private List<TableSchema> schemas;
         private List<DataAccess.Index> indices;
         private IGenerateId idGenerator;
+        private readonly IEnumerable<Column> DefaultColumns = new List<Column>
+        {
+            new Column(ColumnType.String, "ID", hasDefaultValue: true),
+            new Column(ColumnType.String, "DELETED", hasDefaultValue: true),
+        };
 
         public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<DataAccess.Index> indices, IGenerateId idGenerator)
         {
@@ -26,7 +31,9 @@ namespace SharkBase.DataAccess
         {
             if (exists(name))
                 throw new ArgumentException($"The table, {name}, already exists.");
-            schemas.Add(new TableSchema(name, columns));
+            var schemaColumns = DefaultColumns.ToList();
+            schemaColumns.AddRange(columns);
+            schemas.Add(new TableSchema(name, schemaColumns));
             indices.Add(new Index(name, new Dictionary<string, long>()));
             storage.InsertTable(name);
             tables.Add(name);

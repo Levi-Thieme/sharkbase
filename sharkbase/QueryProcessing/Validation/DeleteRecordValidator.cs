@@ -1,16 +1,16 @@
 ﻿using SharkBase.DataAccess;
-using System.Linq;
-using System.Collections.Generic;
 using System;
-using SharkBase.Parsing;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace SharkBase.QueryProcessing.Validation
 {
-    public class SelectValidator : IStatementValidator
+    public class DeleteRecordValidator : IStatementValidator
     {
         private ISchemaProvider schemaProvider;
-
-        public SelectValidator(ISchemaProvider schemaProvider)
+        
+        public DeleteRecordValidator(ISchemaProvider schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }
@@ -22,8 +22,8 @@ namespace SharkBase.QueryProcessing.Validation
                 throw new ArgumentException($"The table, {table}, does not exist.");
             if (tokens.Any())
             {
-                new ColumnValueValidator().ValidateColumnValues(schema, tokens); 
-            }  
+                new ColumnValueValidator().ValidateColumnValues(schema, tokens);
+            }
         }
     }
 }

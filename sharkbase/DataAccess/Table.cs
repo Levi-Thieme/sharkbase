@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace SharkBase.DataAccess
 {
@@ -32,6 +33,7 @@ namespace SharkBase.DataAccess
                 {
                     string guid = GetUniqueId().ToString();
                     writer.Write(guid);
+                    writer.Write(false.ToString());
                     record.WriteTo(writer);
                     long recordOffset = store.Append(schema.Name, stream);
                     index.Add(guid, recordOffset);
@@ -70,7 +72,6 @@ namespace SharkBase.DataAccess
         private Record readRecordFromStream(BinaryReader reader)
         {
             var values = new List<object>();
-            values.Add(reader.ReadString());
             foreach (var type in schema.Columns.Select(c => c.Type))
             {
                 if (ColumnType.Int64 == type)
@@ -79,6 +80,11 @@ namespace SharkBase.DataAccess
                     values.Add(reader.ReadString());
             }
             return new Record(values.Select(v => new Value(v)));
+        }
+
+        public void DeleteRecords(IEnumerable<Record> records)
+        {
+            return;
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();

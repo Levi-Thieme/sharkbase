@@ -19,10 +19,10 @@ namespace SharkBase.QueryProcessing.Validation
         public void Validate(string table, IEnumerable<string> tokens)
         {
             var schema = schemaProvider.GetSchema(table);
-            if (schema.Columns.Count() != tokens.Count())
+            if (schema.Columns.Where(c => !c.HasDefaultValue).Count() != tokens.Count())
                 throw new ArgumentException("The insert statement's number of columns does not match the table's column count.");
             var valueParser = new ValueParser();
-            valueParser.ParseColumnValues(tokens, schema.Columns);
+            valueParser.ParseColumnValues(tokens, schema.Columns.Where(c => !c.HasDefaultValue));
         }
     }
 }

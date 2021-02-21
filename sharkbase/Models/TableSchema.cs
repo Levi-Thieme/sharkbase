@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharkBase.DataAccess
@@ -13,6 +14,20 @@ namespace SharkBase.DataAccess
         {
             this.Name = name;
             this.Columns = columns;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is TableSchema other)
+            {
+                return this.Name == other.Name && Enumerable.SequenceEqual(this.Columns, other.Columns);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode() + this.Columns.GetHashCode();
         }
     }
 }

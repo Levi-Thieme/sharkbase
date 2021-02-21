@@ -24,7 +24,7 @@ namespace SharkBase.Commands
 
         public void Execute()
         {
-            var values = valueParser.ParseColumnValues(statement.ColumnValues, schema.Columns);
+            var values = valueParser.ParseColumnValues(statement.ColumnValues, schema.Columns.Where(c => !c.HasDefaultValue));
             table.InsertRecord(new Record(values.Select(v => new Value(v))));
         }
     }

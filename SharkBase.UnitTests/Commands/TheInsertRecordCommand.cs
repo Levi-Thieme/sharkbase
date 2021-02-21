@@ -7,6 +7,7 @@ using SharkBase.QueryProcessing.Statements;
 using SharkBase.QueryProcessing.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharkBase.UnitTests.Commands
@@ -31,11 +32,15 @@ namespace SharkBase.UnitTests.Commands
         }
 
         [TestMethod]
-        public void WhenExecuted_ItParsesTheColumnValues()
+        public void WhenExecuted_ItParsesTheNonDefaultColumnValues()
         {
             command.Execute();
 
-            parser.Verify(p => p.ParseColumnValues(statement.ColumnValues, schema.Columns), Times.Once);
+            parser.Verify(p => 
+                p.ParseColumnValues(
+                    statement.ColumnValues,
+                    It.Is<IEnumerable<Column>>(values => Enumerable.SequenceEqual(values, schema.Columns.Where(c => !c.HasDefaultValue)))),
+                Times.Once);
         }
     }
 }

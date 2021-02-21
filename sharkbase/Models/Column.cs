@@ -8,11 +8,13 @@ namespace SharkBase.DataAccess
     {
         public readonly ColumnType Type;
         public readonly string Name;
+        public readonly bool HasDefaultValue;
 
-        public Column(ColumnType type, string name)
+        public Column(ColumnType type, string name, bool hasDefaultValue = false)
         {
             this.Type = type;
             this.Name = name;
+            this.HasDefaultValue = hasDefaultValue;
         }
 
         public override bool Equals(object obj)
