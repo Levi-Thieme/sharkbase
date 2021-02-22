@@ -22,8 +22,10 @@ namespace SharkBase.Models
                 writer.Write((long)intValue);
             else if (value is short shortValue)
                 writer.Write((long)shortValue);
-            else if (value is Guid)
-                writer.Write(value.ToString());
+            else if (value is bool boolValue)
+                writer.Write(boolValue);
+            else if (value is Guid guid)
+                writer.Write(guid.ToString());
             else
                 throw new ArgumentException("Value is not writable for the supported value types.");
         }
@@ -37,7 +39,7 @@ namespace SharkBase.Models
 
         public override int GetHashCode()
         {
-            return this.value.GetHashCode();
+            return value.GetHashCode();
         }
 
         public override string ToString()

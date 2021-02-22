@@ -7,6 +7,6 @@ namespace SharkBase.SystemStorage
         void InsertTable(string name);
         void DeleteTable(string name);
         long Append(string name, MemoryStream data);
-        Stream GetReadStream(string name);
+        Stream GetStream(string name);
     }
 }

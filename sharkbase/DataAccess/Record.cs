@@ -25,6 +25,8 @@ namespace SharkBase.DataAccess
                 value.WriteTo(writer);
         }
 
+        public string GetId() => Values.Any() ? Values.First().ToString() : string.Empty;
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj)) return true;

@@ -7,7 +7,8 @@ namespace SharkBase.DataAccess
     public enum ColumnType
     {
         Int64,
-        String
+        String,
+        boolean
     }
 
     public class ColumnTypes
@@ -15,7 +16,8 @@ namespace SharkBase.DataAccess
         private static readonly IEnumerable<string> types = new List<string>
         {
             "INT64",
-            "STRING"
+            "STRING",
+            "BOOLEAN"
         };
 
         public static IEnumerable<string> Types { get { return types; } }
@@ -23,7 +25,8 @@ namespace SharkBase.DataAccess
         public static Dictionary<string, ColumnType> ColumnTypeByName = new Dictionary<string, ColumnType>
         {
             { "INT64", ColumnType.Int64 },
-            { "STRING", ColumnType.String }
+            { "STRING", ColumnType.String },
+            { "BOOLEAN", ColumnType.boolean }
         };
 
         public static bool Exists(string type) => types.Contains(type);

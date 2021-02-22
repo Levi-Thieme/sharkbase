@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SharkBase.DataAccess
+﻿namespace SharkBase.DataAccess
 {
     public class Column
     {

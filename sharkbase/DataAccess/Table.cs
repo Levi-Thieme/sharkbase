@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace SharkBase.DataAccess
 {
@@ -17,7 +16,7 @@ namespace SharkBase.DataAccess
         private IGenerateId idGenerator;
         public TableSchema Schema => this.schema;
 
-        public Table(ISystemStore store, TableSchema schema, DataAccess.Index index, IGenerateId idGenerator)
+        public Table(ISystemStore store, TableSchema schema, Index index, IGenerateId idGenerator)
         {
             this.store = store;
             this.schema = schema;
@@ -33,7 +32,7 @@ namespace SharkBase.DataAccess
                 {
                     string guid = GetUniqueId().ToString();
                     writer.Write(guid);
-                    writer.Write(false.ToString());
+                    writer.Write(false);
                     record.WriteTo(writer);
                     long recordOffset = store.Append(schema.Name, stream);
                     index.Add(guid, recordOffset);
@@ -43,7 +42,7 @@ namespace SharkBase.DataAccess
 
         public Record ReadRecord()
         {
-            using (var stream = store.GetReadStream(schema.Name))
+            using (var stream = store.GetStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -55,7 +54,7 @@ namespace SharkBase.DataAccess
         public IEnumerable<Record> ReadAllRecords()
         {
             List<Record> records = new List<Record>();
-            using (var stream = store.GetReadStream(schema.Name))
+            using (var stream = store.GetStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -78,13 +77,43 @@ namespace SharkBase.DataAccess
                     values.Add(reader.ReadInt64());
                 else if (ColumnType.String == type)
                     values.Add(reader.ReadString());
+                else if (ColumnType.boolean == type)
+                    values.Add(reader.ReadBoolean());
             }
             return new Record(values.Select(v => new Value(v)));
         }
 
         public void DeleteRecords(IEnumerable<Record> records)
         {
-            return;
+            using (var stream = store.GetStream(schema.Name))
+            {
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    foreach (var record in records)
+                    {
+                        deleteRecord(record, writer);
+                    }
+                }
+            }
+        }
+
+        public void DeleteRecord(Record record)
+        {
+            using (var stream = store.GetStream(schema.Name))
+            {
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: false))
+                {
+                    deleteRecord(record, writer);
+                }
+            }
+        }
+
+        private void deleteRecord(Record record, BinaryWriter stream)
+        {
+            const int binaryGuidLength = 37;
+            long isDeletedOffset = index.GetValue(record.GetId()) + binaryGuidLength;
+            stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
+            stream.Write(true);
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();

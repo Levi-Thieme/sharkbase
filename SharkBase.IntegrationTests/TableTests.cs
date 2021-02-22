@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace SharkBase.IntegrationTests
 {
@@ -32,7 +33,7 @@ namespace SharkBase.IntegrationTests
                 new List<Column>
             { 
                 new Column(ColumnType.String, "ID", hasDefaultValue: true),
-                new Column(ColumnType.String, "DELETED", hasDefaultValue: true),
+                new Column(ColumnType.boolean, "DELETED", hasDefaultValue: true),
                 new Column(ColumnType.String, "NAME"),
                 new Column(ColumnType.Int64, "COST") 
             });
@@ -41,7 +42,7 @@ namespace SharkBase.IntegrationTests
             store.InsertTable("test");
             this.table = new Table(store, schema, new DataAccess.Index("test", new Dictionary<string, long>()), mockIdGenerator.Object);
             insertionRecord = new Record(new List<Value> { new Value("pizza"), new Value(9001L) });
-            expectedRecord = new Record(new List<Value> { new Value(guid.ToString()), new Value(false.ToString()), new Value("pizza"), new Value(9001L) });
+            expectedRecord = new Record(new List<Value> { new Value(guid.ToString()), new Value(false), new Value("pizza"), new Value(9001L) });
         }
 
         [TestCleanup]
@@ -56,7 +57,7 @@ namespace SharkBase.IntegrationTests
             table.InsertRecord(insertionRecord);
 
             long length = new FileInfo(tablePath("test")).Length;
-            Assert.AreEqual(57, length);
+            Assert.AreEqual(52, length);
         }
 
         [TestMethod]
@@ -88,14 +89,26 @@ namespace SharkBase.IntegrationTests
             }
             var expectedRecords = new List<Record>
             {
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f81"), new Value(false.ToString()), new Value("Tacos"), new Value(5L) }),
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f82"), new Value(false.ToString()), new Value("pizza"), new Value(9L) }),
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f83"), new Value(false.ToString()), new Value("steak"), new Value(16L) })
+                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f81"), new Value(false), new Value("Tacos"), new Value(5L) }),
+                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f82"), new Value(false), new Value("pizza"), new Value(9L) }),
+                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f83"), new Value(false), new Value("steak"), new Value(16L) })
             };
 
             var actualRecords = table.ReadAllRecords();
 
             CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
+        }
+
+        [TestMethod]
+        public void WhenDeletingARecord_ItSetsItDeletedFieldToTrue()
+        {
+            table.InsertRecord(insertionRecord);
+            var insertedRecord = table.ReadRecord();
+
+            table.DeleteRecord(insertedRecord);
+
+            var deletedRecord = table.ReadRecord();
+            Assert.IsTrue((bool)deletedRecord.Values.ElementAt(1).value);
         }
 
         private string tablePath(string name) => Path.Combine(databaseDirectory, name + ".table");

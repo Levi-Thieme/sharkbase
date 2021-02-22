@@ -9,6 +9,7 @@ namespace SharkBase.Parsing
     {
         public long ParseInt(string value);
         public string ParseString(string value);
+        public bool ParseBoolean(string value);
         public object ParseValue(string value, ColumnType type);
         public IEnumerable<object> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns);
     }
@@ -25,12 +26,19 @@ namespace SharkBase.Parsing
             return string.IsNullOrEmpty(value) ? string.Empty : value;
         }
 
+        public bool ParseBoolean(string value)
+        {
+            return bool.Parse(value);
+        }
+
         public object ParseValue(string value, ColumnType type)
         {
             if (type == ColumnType.Int64)
                 return ParseInt(value);
             else if (type == ColumnType.String)
                 return ParseString(value);
+            else if (type == ColumnType.boolean)
+                return ParseBoolean(value);
             throw new ArgumentException("The column type did not correspond to an existing column type.");
         }
 

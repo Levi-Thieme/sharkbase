@@ -38,8 +38,8 @@ namespace SharkBase.SystemStorage
             }
         }
 
-        public Stream GetReadStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
-
+        public Stream GetStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
+        
         internal IEnumerable<string> GetTableNames()
         {
             if (!Directory.Exists(workingDirectory))

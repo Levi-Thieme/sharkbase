@@ -32,5 +32,11 @@ namespace SharkBase.UnitTests
         {
             Assert.AreEqual(string.Empty, parser.ParseString(null));
         }
+
+        [TestMethod]
+        public void ItParsesBools()
+        {
+            Assert.AreEqual(true, parser.ParseBoolean("true"));
+        }
     }
 }

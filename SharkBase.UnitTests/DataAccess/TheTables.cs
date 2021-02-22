@@ -29,7 +29,7 @@ namespace SharkBase.UnitTests.DataAccess
                new List<Column>
                {
                     new Column(ColumnType.String, "ID"),
-                    new Column(ColumnType.String, "DELETED"),
+                    new Column(ColumnType.boolean, "DELETED"),
                     new Column(ColumnType.Int64, "cost")
                }
            );

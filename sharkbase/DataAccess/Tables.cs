@@ -10,15 +10,15 @@ namespace SharkBase.DataAccess
         private ISystemStore storage;
         private List<string> tables;
         private List<TableSchema> schemas;
-        private List<DataAccess.Index> indices;
+        private List<Index> indices;
         private IGenerateId idGenerator;
         private readonly IEnumerable<Column> DefaultColumns = new List<Column>
         {
             new Column(ColumnType.String, "ID", hasDefaultValue: true),
-            new Column(ColumnType.String, "DELETED", hasDefaultValue: true),
+            new Column(ColumnType.boolean, "DELETED", hasDefaultValue: true),
         };
 
-        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<DataAccess.Index> indices, IGenerateId idGenerator)
+        public Tables(ISystemStore storage, IEnumerable<string> tables, IEnumerable<TableSchema> schemas, IEnumerable<Index> indices, IGenerateId idGenerator)
         {
             this.storage = storage;
             this.tables = tables.ToList();
