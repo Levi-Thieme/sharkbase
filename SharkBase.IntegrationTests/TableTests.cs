@@ -71,6 +71,12 @@ namespace SharkBase.IntegrationTests
         }
 
         [TestMethod]
+        public void GivenNoRecordAreAvailable_WhenReadingARecord_ItReturnsNull()
+        {
+            Assert.IsNull(table.ReadRecord());
+        }
+
+        [TestMethod]
         public void ReadsAllRecords()
         {
             mockIdGenerator.SetupSequence(g => g.GetUniqueId())
@@ -107,8 +113,37 @@ namespace SharkBase.IntegrationTests
 
             table.DeleteRecord(insertedRecord);
 
-            var deletedRecord = table.ReadRecord();
-            Assert.IsTrue((bool)deletedRecord.Values.ElementAt(1).value);
+            Assert.IsTrue(insertedRecord.IsDeleted());
+        }
+
+        [TestMethod]
+        public void GivenDeletedRecordsExist_WhenReadingAllRecords_ItOnlyReturnsNonDeletedOnes()
+        {
+            mockIdGenerator.SetupSequence(g => g.GetUniqueId())
+                            .Returns(Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81"))
+                            .Returns(Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f82"))
+                            .Returns(Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f83"));
+            var recordsToInsert = new List<Record>
+            {
+                new Record(new List<Value> { new Value("Tacos"), new Value(5L) }),
+                new Record(new List<Value> { new Value("pizza"), new Value(9L) }),
+                new Record(new List<Value> { new Value("steak"), new Value(16L) })
+            };
+            foreach (var rec in recordsToInsert)
+            {
+                table.InsertRecord(rec);
+            }
+            table.DeleteRecord(table.ReadAllRecords().ElementAt(1));
+
+            var expectedRecords = new List<Record>
+            {
+                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f81"), new Value(false), new Value("Tacos"), new Value(5L) }),
+                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f83"), new Value(false), new Value("steak"), new Value(16L) })
+            };
+
+            var actualRecords = table.ReadAllRecords();
+
+            CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
         }
 
         private string tablePath(string name) => Path.Combine(databaseDirectory, name + ".table");

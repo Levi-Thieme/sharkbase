@@ -1,4 +1,5 @@
 ﻿using SharkBase.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,20 @@ namespace SharkBase.DataAccess
 
         public string GetId() => Values.Any() ? Values.First().ToString() : string.Empty;
 
+        public bool IsDeleted() => Values.Count() >= 2 ? (bool)Values.ElementAt(1).value : false;
+
+        public void Delete()
+        {
+            var values = Values.ToList();
+            if (values.Count() < 2)
+                throw new Exception("Unable to set a record with less than two values as deleted");
+            else
+            {
+                values[1] = new Value(true);
+                this.Values = values;
+            }
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj)) return true;
@@ -42,7 +57,8 @@ namespace SharkBase.DataAccess
 
         public override int GetHashCode()
         {
-            return this.Values.Select(value => value.GetHashCode()).Sum();
+            string id = GetId();
+            return string.IsNullOrEmpty(id) ? Values.Select(v => v.GetHashCode()).Sum() % int.MaxValue : id.GetHashCode();
         }
 
         public override string ToString() => string.Join(" | ", Values.Select(v => v.ToString()));

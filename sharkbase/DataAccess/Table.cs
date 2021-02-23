@@ -42,13 +42,19 @@ namespace SharkBase.DataAccess
 
         public Record ReadRecord()
         {
+            Record defaultDeletedRecord = new Record(new List<Value> { new Value(Guid.NewGuid().ToString()), new Value(true) });
+            var record = defaultDeletedRecord;
             using (var stream = store.GetStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
-                    return readRecordFromStream(reader);
+                    while (reader.BaseStream.Position != reader.BaseStream.Length && record.IsDeleted())
+                    {
+                        record = readRecordFromStream(reader);
+                    } 
                 }
             }
+            return record.IsDeleted() ? null : record;
         }
 
         public IEnumerable<Record> ReadAllRecords()
@@ -61,7 +67,9 @@ namespace SharkBase.DataAccess
                     var streamLength = reader.BaseStream.Length;
                     while (reader.BaseStream.Position < streamLength)
                     {
-                        records.Add(readRecordFromStream(reader));
+                        var record = readRecordFromStream(reader);
+                        if (!record.IsDeleted())
+                            records.Add(record);
                     }
                 }
             }
@@ -99,6 +107,7 @@ namespace SharkBase.DataAccess
 
         public void DeleteRecord(Record record)
         {
+            record.Delete();
             using (var stream = store.GetStream(schema.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: false))
