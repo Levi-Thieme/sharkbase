@@ -65,6 +65,44 @@ namespace SharkBase.IntegrationTests
             }
         }
 
+        [TestMethod]
+        public void TestStringOverWriteWithBinaryWriter()
+        {
+            File.Create(TablePath("test")).Dispose();
+            var writeOffsets = new List<long>();
+            var fstream = new FileStream(TablePath("test"), FileMode.Open);
+            using (BinaryWriter reader = new BinaryWriter(fstream, System.Text.Encoding.UTF8))
+            {
+                writeOffsets.Add(reader.BaseStream.Position);
+                reader.Write("Bye");
+            }
+
+            fstream = new FileStream(TablePath("test"), FileMode.Open);
+            using (BinaryWriter reader = new BinaryWriter(fstream, System.Text.Encoding.UTF8))
+            {
+                reader.Write("Hello beautiful World!");
+                reader.Write(21L);
+                reader.Write("ok");
+            }
+
+            fstream = new FileStream(TablePath("test"), FileMode.Open);
+            var readOffsets = new List<long>();
+            using (BinaryReader reader = new BinaryReader(fstream))
+            {
+                readOffsets.Add(reader.BaseStream.Position);
+                string text = reader.ReadString();
+                Assert.AreEqual("Hello beautiful World!", text);
+                
+                long remaining = reader.ReadInt64();
+                Assert.AreEqual(21L, remaining);
+
+                string maybeText = reader.ReadString();
+                Assert.AreEqual("ok", maybeText);
+            }
+
+            CollectionAssert.AreEqual(writeOffsets, readOffsets);
+        }
+
         private string TablePath(string name) => Path.Join(workingDirectory, name + ".table");
     }
 }
