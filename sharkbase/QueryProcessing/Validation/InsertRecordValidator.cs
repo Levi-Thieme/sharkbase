@@ -8,9 +8,9 @@ namespace SharkBase.QueryProcessing.Validation
 {
     public class InsertRecordValidator : IStatementValidator
     {
-        private readonly ISchemaProvider schemaProvider;
+        private readonly SchemaRepository schemaProvider;
 
-        public InsertRecordValidator(ISchemaProvider schemaProvider)
+        public InsertRecordValidator(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

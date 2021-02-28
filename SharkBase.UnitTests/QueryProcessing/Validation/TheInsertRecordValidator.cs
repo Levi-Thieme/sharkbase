@@ -10,13 +10,13 @@ namespace SharkBase.UnitTests.QueryProcessing.Validation
     [TestClass]
     public class TheInsertRecordValidator
     {
-        private Mock<ISchemaProvider> mockSchemas;
+        private Mock<SchemaRepository> mockSchemas;
         private InsertRecordValidator validator;
 
         [TestInitialize]
         public void Initialize()
         {
-            mockSchemas = new Mock<ISchemaProvider>();
+            mockSchemas = new Mock<SchemaRepository>();
             mockSchemas.Setup(schemas => schemas.GetSchema("Foods"))
                 .Returns(new TableSchema("Foods", new List<Column> { new Column(ColumnType.Int64, "ID"), new Column(ColumnType.String, "DELETED", true) }));
             validator = new InsertRecordValidator(mockSchemas.Object);

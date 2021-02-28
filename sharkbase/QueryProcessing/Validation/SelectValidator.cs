@@ -8,9 +8,9 @@ namespace SharkBase.QueryProcessing.Validation
 {
     public class SelectValidator : IStatementValidator
     {
-        private ISchemaProvider schemaProvider;
+        private SchemaRepository schemaProvider;
 
-        public SelectValidator(ISchemaProvider schemaProvider)
+        public SelectValidator(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

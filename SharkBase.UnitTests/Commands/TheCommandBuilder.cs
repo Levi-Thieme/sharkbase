@@ -16,7 +16,7 @@ namespace SharkBase.UnitTests.Commands
         [TestInitialize]
         public void Initialize()
         {
-            this.builder = new CommandBuilder(new Mock<ITables>().Object, new Mock<ISchemaProvider>().Object);
+            this.builder = new CommandBuilder(new Mock<ITables>().Object, new Mock<SchemaRepository>().Object);
         }
 
         [TestMethod]

@@ -1,4 +1,5 @@
-﻿using SharkBase.Models;
+﻿using SharkBase.DataAccess.Index;
+using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -10,17 +11,24 @@ namespace SharkBase.DataAccess
 {
     public class Table : ITable
     {
-        private ISystemStore store;
+        private PhysicalStorage store;
         private readonly TableSchema schema;
-        private readonly Index index;
+        private readonly IndexRepository indices;
         private IGenerateId idGenerator;
         public TableSchema Schema => this.schema;
 
-        public Table(ISystemStore store, TableSchema schema, Index index, IGenerateId idGenerator)
+        public Table(PhysicalStorage store, TableSchema schema, PrimaryIndex index, IGenerateId idGenerator)
         {
             this.store = store;
             this.schema = schema;
-            this.index = index;
+            this.idGenerator = idGenerator;
+        }
+
+        public Table(PhysicalStorage store, TableSchema schema, IndexRepository indices, IGenerateId idGenerator)
+        {
+            this.store = store;
+            this.schema = schema;
+            this.indices = indices;
             this.idGenerator = idGenerator;
         }
 
@@ -35,16 +43,22 @@ namespace SharkBase.DataAccess
                     writer.Write(false);
                     record.WriteTo(writer);
                     long recordOffset = store.Append(schema.Name, stream);
-                    index.Add(guid, recordOffset);
+                    InsertPrimaryIndex(guid, recordOffset);
                 }
             }
+        }
+
+        private void InsertPrimaryIndex(string guid, long offset)
+        {
+            var primaryIndex = indices.Get(PrimaryIndex.IndexName(schema.Name));
+            primaryIndex.Add(guid, offset);
         }
 
         public Record ReadRecord()
         {
             Record defaultDeletedRecord = new Record(new List<Value> { new Value(Guid.NewGuid().ToString()), new Value(true) });
             var record = defaultDeletedRecord;
-            using (var stream = store.GetStream(schema.Name))
+            using (var stream = store.GetTableStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -60,7 +74,7 @@ namespace SharkBase.DataAccess
         public IEnumerable<Record> ReadAllRecords()
         {
             List<Record> records = new List<Record>();
-            using (var stream = store.GetStream(schema.Name))
+            using (var stream = store.GetTableStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -93,7 +107,7 @@ namespace SharkBase.DataAccess
 
         public void DeleteRecords(IEnumerable<Record> records)
         {
-            using (var stream = store.GetStream(schema.Name))
+            using (var stream = store.GetTableStream(schema.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
@@ -108,7 +122,7 @@ namespace SharkBase.DataAccess
         public void DeleteRecord(Record record)
         {
             record.Delete();
-            using (var stream = store.GetStream(schema.Name))
+            using (var stream = store.GetTableStream(schema.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: false))
                 {
@@ -120,7 +134,7 @@ namespace SharkBase.DataAccess
         private void deleteRecord(Record record, BinaryWriter stream)
         {
             const int binaryGuidLength = 37;
-            long isDeletedOffset = index.GetValue(record.GetId()) + binaryGuidLength;
+            long isDeletedOffset = indices.Get(PrimaryIndex.IndexName(schema.Name)).GetValue(record.GetId()) + binaryGuidLength;
             stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
             stream.Write(true);
         }

@@ -11,9 +11,9 @@ namespace SharkBase.QueryProcessing.Parsing
     public class DeleteRecordParser : IParser
     {
         private const string DELETE_FROM = "DELETE FROM";
-        private ISchemaProvider schemaProvider;
+        private SchemaRepository schemaProvider;
 
-        public DeleteRecordParser(ISchemaProvider schemaProvider)
+        public DeleteRecordParser(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

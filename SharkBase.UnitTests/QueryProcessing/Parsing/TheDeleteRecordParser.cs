@@ -16,7 +16,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestInitialize]
         public void Initialize()
         {
-            parser = new DeleteRecordParser(new Mock<ISchemaProvider>().Object);
+            parser = new DeleteRecordParser(new Mock<SchemaRepository>().Object);
         }
 
         [TestMethod]

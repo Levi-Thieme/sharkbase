@@ -11,11 +11,11 @@ namespace SharkBase.QueryProcessing.Parsing
     public class InsertRecordParser : IParser
     {
         private const string INSERT_INTO = "INSERT INTO";
-        private ISchemaProvider schemaProvider;
+        private SchemaRepository schemaProvider;
 
         public bool IsParsable(string input) => input.StartsWith(INSERT_INTO);
 
-        public InsertRecordParser(ISchemaProvider schemaProvider)
+        public InsertRecordParser(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

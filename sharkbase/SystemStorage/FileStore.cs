@@ -5,7 +5,7 @@ using SharkBase.DataAccess;
 
 namespace SharkBase.SystemStorage
 {
-    public class FileStore : ISystemStore
+    public class FileStore : PhysicalStorage
     {
         private readonly string workingDirectory;
         private const string TABLE_EXTENSION = ".table";
@@ -38,8 +38,10 @@ namespace SharkBase.SystemStorage
             }
         }
 
-        public Stream GetStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
-        
+        public Stream GetTableStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
+        public Stream GetSchemaStream(string databaseName) => new FileStream(SchemaFilePath(databaseName), FileMode.OpenOrCreate);
+        public Stream GetIndexStream(string indexName) => new FileStream(IndexFilePath(indexName), FileMode.OpenOrCreate);
+
         internal IEnumerable<string> GetTableNames()
         {
             if (!Directory.Exists(workingDirectory))
@@ -50,11 +52,9 @@ namespace SharkBase.SystemStorage
         }
 
         public string SchemaFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{SCHEMAS_EXTENSION}");
-        public string IndexFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{INDEX_EXTENSION}");
-
-        private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";
+        public string IndexFilePath(string name) => Path.Combine(workingDirectory, $"{name}{INDEX_EXTENSION}");
         private string TableFilePath(string name) => Path.Combine(workingDirectory, TableNameWithExtension(name));
+        private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";
         private bool TableExists(string name) => File.Exists(TableFilePath(name));
-        
     }
 }

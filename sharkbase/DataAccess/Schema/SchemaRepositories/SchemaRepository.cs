@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace SharkBase.DataAccess
 {
-    public interface ISchemaProvider
+    public interface SchemaRepository
     {
         void AddSchema(TableSchema table);
-        void RemoveSchema(TableSchema table);
         TableSchema GetSchema(string tableName);
         IEnumerable<TableSchema> GetAllSchemas();
     }

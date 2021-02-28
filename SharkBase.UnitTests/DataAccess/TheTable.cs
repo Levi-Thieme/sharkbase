@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharkBase.DataAccess;
+using SharkBase.DataAccess.Index;
 using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
@@ -15,18 +16,18 @@ namespace SharkBase.UnitTests.DataAccess
     {
         private Table table;
         private Mock<IGenerateId> mockIdGenerator;
-        private Mock<ISystemStore> mockStore;
+        private Mock<PhysicalStorage> mockStore;
         private TableSchema schema;
-        private SharkBase.DataAccess.Index index;
+        private PrimaryIndex index;
         private Guid guid = Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81");
 
         [TestInitialize]
         public void Initialize()
         {
             mockIdGenerator = new Mock<IGenerateId>();
-            mockStore = new Mock<ISystemStore>();
+            mockStore = new Mock<PhysicalStorage>();
             schema = new TableSchema("test", new List<Column>());
-            index = new SharkBase.DataAccess.Index("test", new Dictionary<string, long>());
+            index = new PrimaryIndex("test", new Dictionary<string, long>());
             table = new Table(mockStore.Object, schema, index, mockIdGenerator.Object);
             mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
         }

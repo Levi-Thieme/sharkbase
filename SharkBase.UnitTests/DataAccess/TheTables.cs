@@ -10,8 +10,11 @@ namespace SharkBase.UnitTests.DataAccess
     [TestClass]
     public class TheTables
     {
-        private Mock<ISystemStore> storeMock;
+        private Mock<PhysicalStorage> mockStore;
         private Mock<IGenerateId> mockIdGenerator;
+        private Mock<SchemaRepository> mockSchemas;
+        private Mock<IndexRepository> mockIndices;
+        
         private Tables tables;
         private List<Column> columns;
         private TableSchema expectedSchema;
@@ -19,10 +22,11 @@ namespace SharkBase.UnitTests.DataAccess
         [TestInitialize]
         public void Initialize()
         {
-            storeMock = new Mock<ISystemStore>();
+            mockStore = new Mock<PhysicalStorage>();
             mockIdGenerator = new Mock<IGenerateId>();
-            tables = new Tables(storeMock.Object, new List<string> { "existing_table" }, new List<TableSchema>(), 
-                new List<SharkBase.DataAccess.Index>(), mockIdGenerator.Object);
+            mockSchemas = new Mock<SchemaRepository>();
+            mockIndices = new Mock<IndexRepository>();
+            tables = new Tables(mockStore.Object, mockIdGenerator.Object, mockSchemas.Object, mockIndices.Object, new List<string> { "existing_table" });
             columns = new List<Column> { new Column(ColumnType.Int64, "cost") };
             expectedSchema = new TableSchema(
                "test",
@@ -40,7 +44,7 @@ namespace SharkBase.UnitTests.DataAccess
         {
             tables.Create("test", columns);
             
-            storeMock.Verify(store => store.InsertTable("test"), Times.Once);
+            mockStore.Verify(store => store.InsertTable("test"), Times.Once);
         }
 
         [TestMethod]
@@ -48,7 +52,7 @@ namespace SharkBase.UnitTests.DataAccess
         {
             tables.Create("test", columns);
 
-            Assert.IsTrue(tables.GetSchema("test").Equals(expectedSchema));
+            mockSchemas.Verify(schemas => schemas.AddSchema(expectedSchema), Times.Once);
         }
 
         [TestMethod]
@@ -70,7 +74,7 @@ namespace SharkBase.UnitTests.DataAccess
         {
             tables.Delete("existing_table");
 
-            storeMock.Verify(store => store.DeleteTable("existing_table"), Times.Once);
+            mockStore.Verify(store => store.DeleteTable("existing_table"), Times.Once);
         }
 
         [TestMethod]

@@ -9,9 +9,9 @@ namespace SharkBase.Commands
     public class CommandBuilder
     {
         private ITables tables;
-        private ISchemaProvider schemas;
+        private SchemaRepository schemas;
 
-        public CommandBuilder(ITables tables, ISchemaProvider schemas)
+        public CommandBuilder(ITables tables, SchemaRepository schemas)
         {
             this.tables = tables;
             this.schemas = schemas;

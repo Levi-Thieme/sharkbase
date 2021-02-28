@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharkBase.DataAccess;
+using SharkBase.DataAccess.Index;
 using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
@@ -40,7 +41,7 @@ namespace SharkBase.IntegrationTests
             var store = new FileStore(databaseDirectory);
             store.DeleteTable("test");
             store.InsertTable("test");
-            this.table = new Table(store, schema, new DataAccess.Index("test", new Dictionary<string, long>()), mockIdGenerator.Object);
+            this.table = new Table(store, schema, new PrimaryIndex("test", new Dictionary<string, long>()), mockIdGenerator.Object);
             insertionRecord = new Record(new List<Value> { new Value("pizza"), new Value(9001L) });
             expectedRecord = new Record(new List<Value> { new Value(guid.ToString()), new Value(false), new Value("pizza"), new Value(9001L) });
         }

@@ -11,14 +11,14 @@ namespace SharkBase.UnitTests.QueryProcessing.Validation
     public class TheSelectValidator
     {
         private SelectValidator validator;
-        private Mock<ISchemaProvider> mockSchemas;
+        private Mock<SchemaRepository> mockSchemas;
         private TableSchema schema;
 
         [TestInitialize]
         public void Initialize()
         {
             this.schema = new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, "ID") });
-            this.mockSchemas = new Mock<ISchemaProvider>();
+            this.mockSchemas = new Mock<SchemaRepository>();
             this.mockSchemas.Setup(schemas => schemas.GetSchema(schema.Name)).Returns(schema);
             this.validator = new SelectValidator(mockSchemas.Object);
         }

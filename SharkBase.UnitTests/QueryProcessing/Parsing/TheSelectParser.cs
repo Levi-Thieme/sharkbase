@@ -17,7 +17,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestInitialize]
         public void Initialize()
         {
-            this.parser = new SelectParser(new Mock<ISchemaProvider>().Object);
+            this.parser = new SelectParser(new Mock<SchemaRepository>().Object);
         }
 
         [TestMethod]

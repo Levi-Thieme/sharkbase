@@ -11,11 +11,11 @@ namespace SharkBase.QueryProcessing.Parsing
     public class SelectParser : IParser
     {
         private const string SELECT_FROM = "SELECT FROM";
-        private readonly ISchemaProvider schemaProvider;
+        private readonly SchemaRepository schemaProvider;
 
         public bool IsParsable(string input) => input.StartsWith(SELECT_FROM);
 
-        public SelectParser(ISchemaProvider schemaProvider)
+        public SelectParser(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

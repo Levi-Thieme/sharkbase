@@ -8,9 +8,9 @@ namespace SharkBase.QueryProcessing.Validation
 {
     public class DeleteRecordValidator : IStatementValidator
     {
-        private ISchemaProvider schemaProvider;
+        private SchemaRepository schemaProvider;
         
-        public DeleteRecordValidator(ISchemaProvider schemaProvider)
+        public DeleteRecordValidator(SchemaRepository schemaProvider)
         {
             this.schemaProvider = schemaProvider;
         }

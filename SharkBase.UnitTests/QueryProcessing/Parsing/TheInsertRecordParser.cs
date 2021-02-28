@@ -17,7 +17,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestInitialize]
         public void Initialize()
         {
-            parser = new InsertRecordParser(new Mock<ISchemaProvider>().Object);
+            parser = new InsertRecordParser(new Mock<SchemaRepository>().Object);
         }
 
         [TestMethod]
