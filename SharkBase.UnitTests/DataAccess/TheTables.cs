@@ -65,6 +65,14 @@ namespace SharkBase.UnitTests.DataAccess
             }
 
             [TestMethod]
+            public void ItAddsASecondaryIndexForDeletion()
+            {
+                tables.Create("test", columns);
+
+                mockIndices.Verify(indices => indices.AddSecondaryIndex("test", "IS_DELETED"));
+            }
+
+            [TestMethod]
             public void WhenCreatingATable_ItInsertsTheTable()
             {
                 tables.Create("test", columns);
@@ -99,7 +107,7 @@ namespace SharkBase.UnitTests.DataAccess
             }
 
             [TestMethod]
-            public void ItRemovesThePrimaryIndex()
+            public void ItRemovesAllIndices()
             {
                 tables.Delete("existing_table");
 

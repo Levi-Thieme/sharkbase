@@ -24,6 +24,11 @@ namespace SharkBase.DataAccess
 
         public bool HasKey(K key) => Indices.ContainsKey(key);
 
+        public void Update(K key, V value)
+        {
+            Indices[key] = value;
+        }
+
         public override bool Equals(object obj)
         {
             var other = obj as Index<K, V>;

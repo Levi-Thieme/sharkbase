@@ -2,6 +2,7 @@
 using Moq;
 using SharkBase.DataAccess;
 using SharkBase.DataAccess.Index;
+using SharkBase.DataAccess.Index.Models;
 using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
@@ -20,6 +21,7 @@ namespace SharkBase.UnitTests.DataAccess
         private Mock<IndexRepository> mockIndices;
         private TableSchema schema;
         private PrimaryIndex index;
+        private SecondaryIndex<bool> deletedIndex;
         private Guid guid = Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81");
         private const string tableName = "test";
 
@@ -31,9 +33,12 @@ namespace SharkBase.UnitTests.DataAccess
             mockIndices = new Mock<IndexRepository>();
             schema = new TableSchema(tableName, new List<Column>());
             index = new PrimaryIndex(tableName, new Dictionary<string, long>());
+            deletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool>());
             table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
             mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
             mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
+            mockIndices.Setup(indices => indices.Get<bool>(tableName, IndexNames.IS_DELETED)).Returns(deletedIndex);
+            mockStore.Setup(store => store.GetTableStream(It.IsAny<string>())).Returns(new MemoryStream());
         }
 
         [TestMethod]
@@ -46,7 +51,7 @@ namespace SharkBase.UnitTests.DataAccess
         public class WhenInsertingARecord : TheTable
         {
             [TestMethod]
-            public void WhenInsertingARecord_ItGetsANewGuid()
+            public void ItGetsANewGuid()
             {
                 table.InsertRecord(new Record(new List<Value>()));
 
@@ -62,13 +67,33 @@ namespace SharkBase.UnitTests.DataAccess
             }
 
             [TestMethod]
-            public void WhenInsertingARecord_ItUpdatesThePrimaryIndex()
+            public void ItUpdatesThePrimaryIndex()
             {
                 mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
 
                 table.InsertRecord(new Record(new List<Value>()));
 
                 mockIndices.Verify(indices => indices.Upsert(index), Times.Once);
+            }
+
+            [TestMethod]
+            public void ItUpdatesTheDeletedIndex()
+            {
+                mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
+
+                table.InsertRecord(new Record(new List<Value>()));
+
+                mockIndices.Verify(indices => indices.Upsert<bool>(deletedIndex), Times.Once);
+            }
+        }
+
+        [TestClass]
+        public class WhenDeletingARecord : TheTable
+        {
+            [TestMethod]
+            public void ItGetsTheIsDeletedIndex()
+            {
+                table.DeleteRecord()
             }
         }
     }

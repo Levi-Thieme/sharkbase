@@ -1,4 +1,5 @@
 ﻿using SharkBase.DataAccess.Index;
+using SharkBase.DataAccess.Index.Models;
 using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
@@ -36,16 +37,24 @@ namespace SharkBase.DataAccess
                     writer.Write(false);
                     record.WriteTo(writer);
                     long recordOffset = store.Append(schema.Name, stream);
-                    InsertPrimaryIndex(guid, recordOffset);
+                    insertPrimaryIndex(guid, recordOffset);
+                    insertIsDeletedIndex(guid);
                 }
             }
         }
 
-        private void InsertPrimaryIndex(string guid, long offset)
+        private void insertPrimaryIndex(string guid, long offset)
         {
             var primaryIndex = indices.Get(schema.Name);
             primaryIndex.Add(guid, offset);
             indices.Upsert(primaryIndex);
+        }
+
+        private void insertIsDeletedIndex(string guid)
+        {
+            var deletedIndex = indices.Get<bool>(schema.Name, IndexNames.IS_DELETED);
+            deletedIndex.Add(guid, false);
+            indices.Upsert<bool>(deletedIndex);
         }
 
         public Record ReadRecord()
@@ -128,9 +137,11 @@ namespace SharkBase.DataAccess
         private void deleteRecord(Record record, BinaryWriter stream)
         {
             const int binaryGuidLength = 37;
-            long isDeletedOffset = indices.Get(schema.Name).GetValue(record.GetId()) + binaryGuidLength;
+            string id = record.GetId();
+            long isDeletedOffset = indices.Get(schema.Name).GetValue(id) + binaryGuidLength;
             stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
             stream.Write(true);
+            indices.GetIsDeletedIndex(schema.Name).Update(id, true);
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();

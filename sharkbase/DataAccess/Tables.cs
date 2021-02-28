@@ -1,4 +1,5 @@
 ﻿using SharkBase.DataAccess.Index;
+using SharkBase.DataAccess.Index.Models;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace SharkBase.DataAccess
             storage.InsertTable(tableName);
             schemas.Add(tableName, columns);
             indices.AddPrimaryIndex(tableName);
+            indices.AddSecondaryIndex(tableName, IndexNames.IS_DELETED);
             tables.Add(tableName);
         }
 
