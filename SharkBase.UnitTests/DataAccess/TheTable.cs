@@ -21,35 +21,62 @@ namespace SharkBase.UnitTests.DataAccess
         private Mock<IndexRepository> mockIndices;
         private TableSchema schema;
         private PrimaryIndex index;
-        private SecondaryIndex<bool> deletedIndex;
         private Guid guid = Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81");
         private const string tableName = "test";
 
-        [TestInitialize]
-        public void Initialize()
-        {
-            mockIdGenerator = new Mock<IGenerateId>();
-            mockStore = new Mock<PhysicalStorage>();
-            mockIndices = new Mock<IndexRepository>();
-            schema = new TableSchema(tableName, new List<Column>());
-            index = new PrimaryIndex(tableName, new Dictionary<string, long>());
-            deletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool>());
-            table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
-            mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
-            mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
-            mockIndices.Setup(indices => indices.Get<bool>(tableName, IndexNames.IS_DELETED)).Returns(deletedIndex);
-            mockStore.Setup(store => store.GetTableStream(It.IsAny<string>())).Returns(new MemoryStream());
-        }
+        
 
-        [TestMethod]
-        public void WhenGettingAUniqueId_ItReturnsTheGeneratedId()
+        [TestClass]
+        public class WhenGettingAUniqueId : TheTable
         {
-            Assert.AreEqual(guid, table.GetUniqueId());
+            [TestInitialize]
+            public void Initialize()
+            {
+                mockIdGenerator = new Mock<IGenerateId>();
+                mockStore = new Mock<PhysicalStorage>();
+                mockIndices = new Mock<IndexRepository>();
+                schema = new TableSchema(tableName, new List<Column>());
+                table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
+            }
+
+            [TestMethod]
+            public void ItGetsAUniqueIdFromTheGenerator()
+            {
+                table.GetUniqueId();
+
+                mockIdGenerator.Verify(generator => generator.GetUniqueId(), Times.Once);
+            }
+
+            [TestMethod]
+            public void ItReturnsTheGeneratedId()
+            {
+                mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
+
+                Assert.AreEqual(guid, table.GetUniqueId());
+            }
         }
 
         [TestClass]
         public class WhenInsertingARecord : TheTable
         {
+            SecondaryIndex<bool> deletedIndex;
+
+            [TestInitialize]
+            public void Initialize()
+            {
+                mockIdGenerator = new Mock<IGenerateId>();
+                mockStore = new Mock<PhysicalStorage>();
+                mockIndices = new Mock<IndexRepository>();
+                schema = new TableSchema(tableName, new List<Column>());
+                index = new PrimaryIndex(tableName, new Dictionary<string, long>());
+                deletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool>());
+                table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
+                mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
+                mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
+                mockIndices.Setup(indices => indices.GetIsDeletedIndex(tableName)).Returns(deletedIndex);
+                mockStore.Setup(store => store.GetTableStream(It.IsAny<string>())).Returns(new MemoryStream());
+            }
+
             [TestMethod]
             public void ItGetsANewGuid()
             {
@@ -90,10 +117,52 @@ namespace SharkBase.UnitTests.DataAccess
         [TestClass]
         public class WhenDeletingARecord : TheTable
         {
+            private SecondaryIndex<bool> isDeletedIndex;
+
+            [TestInitialize]
+            public void Initialize()
+            {
+                mockIdGenerator = new Mock<IGenerateId>();
+                mockStore = new Mock<PhysicalStorage>();
+                mockIndices = new Mock<IndexRepository>();
+                schema = new TableSchema(tableName, new List<Column>());
+                index = new PrimaryIndex(tableName, new Dictionary<string, long> { { guid.ToString(), 0L } });
+                isDeletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool> { { guid.ToString(), false } });
+                table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
+                mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
+                mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
+                mockIndices.Setup(indices => indices.GetIsDeletedIndex(tableName)).Returns(isDeletedIndex);
+                mockStore.Setup(store => store.GetTableStream(It.IsAny<string>())).Returns(new MemoryStream());
+            }
+
+            [TestMethod]
+            public void ItGetsThePrimaryIndex()
+            {
+                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+
+                table.DeleteRecord(record);
+
+                mockIndices.Verify(indices => indices.Get(schema.Name), Times.Once);
+            }
+
             [TestMethod]
             public void ItGetsTheIsDeletedIndex()
             {
-                table.DeleteRecord()
+                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+
+                table.DeleteRecord(record);
+
+                mockIndices.Verify(indices => indices.GetIsDeletedIndex(schema.Name), Times.Once);
+            }
+
+            [TestMethod]
+            public void ItSetsTheRecordAsDeletedInTheIsDeletedIndex()
+            {
+                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+
+                table.DeleteRecord(record);
+
+                Assert.IsTrue(isDeletedIndex.GetValue(record.GetId()));
             }
         }
     }

@@ -52,7 +52,7 @@ namespace SharkBase.DataAccess
 
         private void insertIsDeletedIndex(string guid)
         {
-            var deletedIndex = indices.Get<bool>(schema.Name, IndexNames.IS_DELETED);
+            var deletedIndex = indices.GetIsDeletedIndex(schema.Name);
             deletedIndex.Add(guid, false);
             indices.Upsert<bool>(deletedIndex);
         }
