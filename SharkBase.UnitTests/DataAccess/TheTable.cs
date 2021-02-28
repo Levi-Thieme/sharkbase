@@ -17,19 +17,23 @@ namespace SharkBase.UnitTests.DataAccess
         private Table table;
         private Mock<IGenerateId> mockIdGenerator;
         private Mock<PhysicalStorage> mockStore;
+        private Mock<IndexRepository> mockIndices;
         private TableSchema schema;
         private PrimaryIndex index;
         private Guid guid = Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81");
+        private const string tableName = "test";
 
         [TestInitialize]
         public void Initialize()
         {
             mockIdGenerator = new Mock<IGenerateId>();
             mockStore = new Mock<PhysicalStorage>();
-            schema = new TableSchema("test", new List<Column>());
-            index = new PrimaryIndex("test", new Dictionary<string, long>());
-            table = new Table(mockStore.Object, schema, index, mockIdGenerator.Object);
+            mockIndices = new Mock<IndexRepository>();
+            schema = new TableSchema(tableName, new List<Column>());
+            index = new PrimaryIndex(tableName, new Dictionary<string, long>());
+            table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
             mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
+            mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
         }
 
         [TestMethod]
@@ -38,22 +42,34 @@ namespace SharkBase.UnitTests.DataAccess
             Assert.AreEqual(guid, table.GetUniqueId());
         }
 
-        [TestMethod]
-        public void WhenInsertingARecord_ItGetsANewGuid()
+        [TestClass]
+        public class WhenInsertingARecord : TheTable
         {
-            table.InsertRecord(new Record(new List<Value>()));
+            [TestMethod]
+            public void WhenInsertingARecord_ItGetsANewGuid()
+            {
+                table.InsertRecord(new Record(new List<Value>()));
 
-            mockIdGenerator.Verify(g => g.GetUniqueId(), Times.Once);
-        }
+                mockIdGenerator.Verify(g => g.GetUniqueId(), Times.Once);
+            }
 
-        [TestMethod]
-        public void WhenInsertingARecord_ItAddsThePositionToTheIndex()
-        {
-            mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
+            [TestMethod]
+            public void ItGetsThePrimaryIndex()
+            {
+                table.InsertRecord(new Record(new List<Value>()));
 
-            table.InsertRecord(new Record(new List<Value>()));
+                mockIndices.Verify(indices => indices.Get(tableName), Times.Once);
+            }
 
-            Assert.AreEqual(35, index.GetValue(guid.ToString()));
+            [TestMethod]
+            public void WhenInsertingARecord_ItUpdatesThePrimaryIndex()
+            {
+                mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
+
+                table.InsertRecord(new Record(new List<Value>()));
+
+                mockIndices.Verify(indices => indices.Upsert(index), Times.Once);
+            }
         }
     }
 }

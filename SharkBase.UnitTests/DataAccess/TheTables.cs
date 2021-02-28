@@ -39,56 +39,88 @@ namespace SharkBase.UnitTests.DataAccess
            );
         }
 
-        [TestMethod]
-        public void WhenCreatingATable_ItInsertsTheTable()
+        [TestClass]
+        public class WhenCreatingATable : TheTables
         {
-            tables.Create("test", columns);
-            
-            mockStore.Verify(store => store.InsertTable("test"), Times.Once);
+            [TestMethod]
+            public void WhenCreatingATableThatAlreadyExists_ItThrowsAnException()
+            {
+                Assert.ThrowsException<ArgumentException>(() => tables.Create("existing_table", new List<Column>()));
+            }
+
+            [TestMethod]
+            public void WhenCreatingATable_ItAddsItSchemaWithDefaultColumns()
+            {
+                tables.Create("test", columns);
+
+                mockSchemas.Verify(schemas => schemas.Add("test", columns), Times.Once);
+            }
+
+            [TestMethod]
+            public void ItAddsAPrimaryIndex()
+            {
+                tables.Create("test", columns);
+
+                mockIndices.Verify(indices => indices.AddPrimaryIndex("test"));
+            }
+
+            [TestMethod]
+            public void WhenCreatingATable_ItInsertsTheTable()
+            {
+                tables.Create("test", columns);
+
+                mockStore.Verify(store => store.InsertTable("test"), Times.Once);
+            }
+
+            [TestMethod]
+            public void AfterATableIsCreated_ItShouldExist()
+            {
+                tables.Create("test", columns);
+
+                Assert.IsTrue(tables.Exists("test"));
+            }
         }
 
-        [TestMethod]
-        public void WhenCreatingATable_ItAddsItSchemaWithDefaultColumns()
+        [TestClass]
+        public class WhenDeletingATable : TheTables
         {
-            tables.Create("test", columns);
+            [TestMethod]
+            public void ThatDoesNotExist_ItThrowsAnException()
+            {
+                Assert.ThrowsException<ArgumentException>(() => tables.Delete("aaa"));
+            }
 
-            mockSchemas.Verify(schemas => schemas.AddSchema(expectedSchema), Times.Once);
-        }
+            [TestMethod]
+            public void ItDeletesTheSchema()
+            {
+                tables.Delete("existing_table");
 
-        [TestMethod]
-        public void WhenATableIsCreated_ItShouldExist()
-        {
-            tables.Create("test", columns);
+                mockSchemas.Verify(schemas => schemas.Remove("existing_table"));
+            }
 
-            Assert.IsTrue(tables.Exists("test"));
-        }
+            [TestMethod]
+            public void ItRemovesThePrimaryIndex()
+            {
+                tables.Delete("existing_table");
 
-        [TestMethod]
-        public void WhenCreatingATableThatAlreadyExists_ItThrowsAnException()
-        {
-            Assert.ThrowsException<ArgumentException>(() => tables.Create("existing_table", new List<Column>()));
-        }
+                mockIndices.Verify(indices => indices.RemoveAll("existing_table"));
+            }
 
-        [TestMethod]
-        public void WhenDeletingATable_ItDeletesTheTable()
-        {
-            tables.Delete("existing_table");
+            [TestMethod]
+            public void WhenDeletingATable_ItDeletesTheTable()
+            {
+                tables.Delete("existing_table");
 
-            mockStore.Verify(store => store.DeleteTable("existing_table"), Times.Once);
-        }
+                mockStore.Verify(store => store.DeleteTable("existing_table"), Times.Once);
+            }
 
-        [TestMethod]
-        public void AfterATableIsDeleted_ItShouldNotExist()
-        {
-            tables.Delete("existing_table");
+            [TestMethod]
+            public void AfterATableIsDeleted_ItShouldNotExist()
+            {
+                tables.Delete("existing_table");
 
-            Assert.IsFalse(tables.Exists("existing_table"));
-        }
-
-        [TestMethod]
-        public void WhenDeletingATableThatDoesNotExist_ItThrowsAnException()
-        {
-            Assert.ThrowsException<ArgumentException>(() => tables.Delete("aaa"));
+                Assert.IsFalse(tables.Exists("existing_table"));
+            }
         }
 
         [TestMethod]

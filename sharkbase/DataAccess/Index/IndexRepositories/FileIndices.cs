@@ -16,7 +16,7 @@ namespace SharkBase.DataAccess.Index.Repositories
 
         public void Upsert(PrimaryIndex index)
         {
-            using (var stream = store.GetIndexStream(index.Name))
+            using (var stream = store.GetIndexStream(index.Table, index.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
@@ -27,7 +27,7 @@ namespace SharkBase.DataAccess.Index.Repositories
 
         public void Upsert<K>(SecondaryIndex<K> index)
         {
-            using (var stream = store.GetIndexStream(index.Name))
+            using (var stream = store.GetIndexStream(index.Table, index.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
@@ -36,9 +36,9 @@ namespace SharkBase.DataAccess.Index.Repositories
             }
         }
 
-        public PrimaryIndex Get(string name)
+        public PrimaryIndex Get(string table)
         {
-            using (var stream = store.GetIndexStream(name))
+            using (var stream = store.GetIndexStream(table, PrimaryIndex.IndexName(table)))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -48,9 +48,9 @@ namespace SharkBase.DataAccess.Index.Repositories
             }
         }
 
-        public SecondaryIndex<K> Get<K>(string name)
+        public SecondaryIndex<K> Get<K>(string table, string indexName)
         {
-            using (var stream = store.GetIndexStream(name))
+            using (var stream = store.GetIndexStream(table, indexName))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
@@ -58,6 +58,16 @@ namespace SharkBase.DataAccess.Index.Repositories
                     return JsonConvert.DeserializeObject<SecondaryIndex<K>>(json);
                 }
             }
+        }
+
+        public void AddPrimaryIndex(string tableName)
+        {
+            this.Upsert(new PrimaryIndex(tableName, new System.Collections.Generic.Dictionary<string, long>())); 
+        }
+
+        public void RemoveAll(string tableName)
+        {
+            store.DeleteAllIndices(tableName);
         }
     }
 }

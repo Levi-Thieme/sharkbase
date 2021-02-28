@@ -14,6 +14,7 @@ namespace SharkBase.IntegrationTests
     {
         private const string database = "Integration_test_db";
         private readonly string databaseDirectory = Path.Join(Path.GetTempPath(), database);
+        private const string table = "test";
         FileStore store;
         FileIndices indices;
         PrimaryIndex primaryIndex;
@@ -25,14 +26,39 @@ namespace SharkBase.IntegrationTests
             Directory.CreateDirectory(databaseDirectory);
             store = new FileStore(databaseDirectory);
             indices = new FileIndices(store);
-            primaryIndex = new PrimaryIndex("test", new Dictionary<string, long> { { "12345", 0L } });
-            secondaryIndex = new SecondaryIndex<bool>("test", "isDeleted", new Dictionary<string, bool> { { "12345", true } });
+            primaryIndex = new PrimaryIndex(table, new Dictionary<string, long> { { "12345", 0L } });
+            secondaryIndex = new SecondaryIndex<bool>(table, "isDeleted", new Dictionary<string, bool> { { "12345", true } });
+            Directory.CreateDirectory(Path.Combine(databaseDirectory, table));
+            File.Create(Path.Combine(databaseDirectory, table, $"{table}.table")).Dispose();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
             Directory.Delete(databaseDirectory, true);
+        }
+
+        [TestMethod]
+        public void GivenATableName_WhenRemovingAllIndices_ItDeletesThem()
+        {
+            indices.Upsert(primaryIndex);
+            indices.Upsert<bool>(secondaryIndex);
+
+            indices.RemoveAll(table);
+
+            Assert.IsFalse(File.Exists(store.IndexFilePath(table, primaryIndex.Name)));
+            Assert.IsFalse(File.Exists(store.IndexFilePath(table, secondaryIndex.Name)));
+        }
+
+        [TestMethod]
+        public void GivenATableName_WhenAddingAPrimaryIndex_ItUpsertsThePrimaryIndex()
+        {
+            var expectedIndex = new PrimaryIndex(table, new Dictionary<string, long>());
+            
+            indices.AddPrimaryIndex(table);
+
+            var actualIndex = indices.Get(table);
+            Assert.AreEqual(expectedIndex, actualIndex);
         }
 
         [TestClass]
@@ -43,7 +69,7 @@ namespace SharkBase.IntegrationTests
             {
                 indices.Upsert(primaryIndex);
 
-                Assert.IsTrue(File.Exists(store.IndexFilePath(primaryIndex.Name)));
+                Assert.IsTrue(File.Exists(store.IndexFilePath(table, primaryIndex.Name)));
             }
 
             [TestMethod]
@@ -51,7 +77,7 @@ namespace SharkBase.IntegrationTests
             {
                 indices.Upsert(primaryIndex);
 
-                var retrievedIndex = indices.Get(primaryIndex.Name);
+                var retrievedIndex = indices.Get(table);
 
                 Assert.AreEqual(primaryIndex, retrievedIndex);
             }
@@ -65,7 +91,7 @@ namespace SharkBase.IntegrationTests
             {
                 indices.Upsert(secondaryIndex);
 
-                Assert.IsTrue(File.Exists(store.IndexFilePath(secondaryIndex.Name)));
+                Assert.IsTrue(File.Exists(store.IndexFilePath(table, secondaryIndex.Name)));
             }
 
             [TestMethod]
@@ -73,7 +99,7 @@ namespace SharkBase.IntegrationTests
             {
                 indices.Upsert(secondaryIndex);
 
-                var retrievedIndex = indices.Get<bool>(secondaryIndex.Name);
+                var retrievedIndex = indices.Get<bool>(table, secondaryIndex.Name);
 
                 Assert.AreEqual(secondaryIndex, retrievedIndex);
             }

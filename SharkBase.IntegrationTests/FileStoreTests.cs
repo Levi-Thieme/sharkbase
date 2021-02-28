@@ -13,6 +13,7 @@ namespace SharkBase.IntegrationTests
     {
         private FileStore store;
         private readonly string workingDirectory = Path.Join(Path.GetTempPath(), "integration_test_db");
+        private const string tableName = "test";
 
         [TestInitialize]
         public void Initialize()
@@ -20,6 +21,8 @@ namespace SharkBase.IntegrationTests
             if (!Directory.Exists(workingDirectory))
                 Directory.CreateDirectory(workingDirectory);
             this.store = new FileStore(workingDirectory);
+            Directory.CreateDirectory(Path.Combine(workingDirectory, tableName));
+            File.Create(TablePath(tableName)).Dispose();
         }
 
         [TestCleanup]
@@ -31,26 +34,22 @@ namespace SharkBase.IntegrationTests
         [TestMethod]
         public void CreatesATable()
         {
-            store.InsertTable("MYTABLE");
+            store.InsertTable(tableName);
 
-            Assert.IsTrue(File.Exists(TablePath("MYTABLE")));
+            Assert.IsTrue(File.Exists(TablePath(tableName)));
         }
 
         [TestMethod]
         public void DeletesATable()
         {
-            File.Create(TablePath("MYTABLE")).Dispose();
+            store.DeleteTable(tableName);
 
-            store.DeleteTable("MYTABLE");
-
-            Assert.IsFalse(File.Exists(TablePath("MYTABLE")));
+            Assert.IsFalse(File.Exists(TablePath(tableName)));
         }
 
         [TestMethod]
         public void ReadsRecords()
         {
-            File.Create(TablePath("test")).Dispose();
-
             var fstream = new FileStream(TablePath("test"), FileMode.Open);
             using (BinaryWriter reader = new BinaryWriter(fstream, System.Text.Encoding.UTF8))
             {
@@ -68,7 +67,6 @@ namespace SharkBase.IntegrationTests
         [TestMethod]
         public void TestStringOverWriteWithBinaryWriter()
         {
-            File.Create(TablePath("test")).Dispose();
             var writeOffsets = new List<long>();
             var fstream = new FileStream(TablePath("test"), FileMode.Open);
             using (BinaryWriter reader = new BinaryWriter(fstream, System.Text.Encoding.UTF8))
@@ -103,6 +101,6 @@ namespace SharkBase.IntegrationTests
             CollectionAssert.AreEqual(writeOffsets, readOffsets);
         }
 
-        private string TablePath(string name) => Path.Join(workingDirectory, name + ".table");
+        private string TablePath(string name) => Path.Join(workingDirectory, name, $"{name}.table");
     }
 }

@@ -17,13 +17,6 @@ namespace SharkBase.DataAccess
         private IGenerateId idGenerator;
         public TableSchema Schema => this.schema;
 
-        public Table(PhysicalStorage store, TableSchema schema, PrimaryIndex index, IGenerateId idGenerator)
-        {
-            this.store = store;
-            this.schema = schema;
-            this.idGenerator = idGenerator;
-        }
-
         public Table(PhysicalStorage store, TableSchema schema, IndexRepository indices, IGenerateId idGenerator)
         {
             this.store = store;
@@ -50,8 +43,9 @@ namespace SharkBase.DataAccess
 
         private void InsertPrimaryIndex(string guid, long offset)
         {
-            var primaryIndex = indices.Get(PrimaryIndex.IndexName(schema.Name));
+            var primaryIndex = indices.Get(schema.Name);
             primaryIndex.Add(guid, offset);
+            indices.Upsert(primaryIndex);
         }
 
         public Record ReadRecord()
@@ -134,7 +128,7 @@ namespace SharkBase.DataAccess
         private void deleteRecord(Record record, BinaryWriter stream)
         {
             const int binaryGuidLength = 37;
-            long isDeletedOffset = indices.Get(PrimaryIndex.IndexName(schema.Name)).GetValue(record.GetId()) + binaryGuidLength;
+            long isDeletedOffset = indices.Get(schema.Name).GetValue(record.GetId()) + binaryGuidLength;
             stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
             stream.Write(true);
         }

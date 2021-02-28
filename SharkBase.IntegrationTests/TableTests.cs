@@ -2,6 +2,8 @@
 using Moq;
 using SharkBase.DataAccess;
 using SharkBase.DataAccess.Index;
+using SharkBase.DataAccess.Index.Repositories;
+using SharkBase.DataAccess.Schema.Repositories;
 using SharkBase.Models;
 using SharkBase.SystemStorage;
 using System;
@@ -16,12 +18,13 @@ namespace SharkBase.IntegrationTests
     public class TableTests
     {
         private Table table;
-        private TableSchema schema;
         private Record insertionRecord;
         private Record expectedRecord;
         private readonly string databaseDirectory = Path.Join(Path.GetTempPath(), "Integration_test_db");
         private Guid guid = Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f81");
+        private const string tableName = "test";
         private Mock<IGenerateId> mockIdGenerator;
+        private IndexRepository indices; 
 
         [TestInitialize]
         public void Initialize()
@@ -30,18 +33,16 @@ namespace SharkBase.IntegrationTests
             mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
             if (!Directory.Exists(databaseDirectory))
                 Directory.CreateDirectory(databaseDirectory);
-            schema = new TableSchema("test", 
-                new List<Column>
-            { 
-                new Column(ColumnType.String, "ID", hasDefaultValue: true),
-                new Column(ColumnType.boolean, "DELETED", hasDefaultValue: true),
-                new Column(ColumnType.String, "NAME"),
-                new Column(ColumnType.Int64, "COST") 
-            });
             var store = new FileStore(databaseDirectory);
-            store.DeleteTable("test");
-            store.InsertTable("test");
-            this.table = new Table(store, schema, new PrimaryIndex("test", new Dictionary<string, long>()), mockIdGenerator.Object);
+            this.indices = new FileIndices(store);
+            var tables = new Tables(store, mockIdGenerator.Object, new FileSchemas(store), new FileIndices(store), new List<string>());
+            var columns = new List<Column>
+            {
+                new Column(ColumnType.String, "NAME"),
+                new Column(ColumnType.Int64, "COST")
+            };
+            tables.Create(tableName, columns);
+            this.table = tables.GetByName(tableName) as Table;
             insertionRecord = new Record(new List<Value> { new Value("pizza"), new Value(9001L) });
             expectedRecord = new Record(new List<Value> { new Value(guid.ToString()), new Value(false), new Value("pizza"), new Value(9001L) });
         }
@@ -147,6 +148,6 @@ namespace SharkBase.IntegrationTests
             CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
         }
 
-        private string tablePath(string name) => Path.Combine(databaseDirectory, name + ".table");
+        private string tablePath(string name) => Path.Combine(databaseDirectory, name, $"{name}.table");
     }
 }

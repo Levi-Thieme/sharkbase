@@ -9,7 +9,7 @@ namespace SharkBase.SystemStorage
     {
         private readonly string workingDirectory;
         private const string TABLE_EXTENSION = ".table";
-        private const string SCHEMAS_EXTENSION = ".schemas";
+        private const string SCHEMAS_EXTENSION = ".schema";
         private const string INDEX_EXTENSION = ".index";
 
         public FileStore(string workingDirectory)
@@ -19,6 +19,7 @@ namespace SharkBase.SystemStorage
 
         public void InsertTable(string name) 
         {
+            Directory.CreateDirectory(TableDirectoryPath(name));
             File.Create(TableFilePath(name)).Dispose();
         }
 
@@ -39,8 +40,8 @@ namespace SharkBase.SystemStorage
         }
 
         public Stream GetTableStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
-        public Stream GetSchemaStream(string databaseName) => new FileStream(SchemaFilePath(databaseName), FileMode.OpenOrCreate);
-        public Stream GetIndexStream(string indexName) => new FileStream(IndexFilePath(indexName), FileMode.OpenOrCreate);
+        public Stream GetSchemaStream(string tableName) => new FileStream(SchemaFilePath(tableName), FileMode.OpenOrCreate);
+        public Stream GetIndexStream(string tableName, string indexName) => new FileStream(IndexFilePath(tableName, indexName), FileMode.OpenOrCreate);
 
         internal IEnumerable<string> GetTableNames()
         {
@@ -51,10 +52,29 @@ namespace SharkBase.SystemStorage
                 .Select(file => Path.GetFileNameWithoutExtension(file));
         }
 
-        public string SchemaFilePath(string databaseName) => Path.Combine(workingDirectory, $"{databaseName}{SCHEMAS_EXTENSION}");
-        public string IndexFilePath(string name) => Path.Combine(workingDirectory, $"{name}{INDEX_EXTENSION}");
-        private string TableFilePath(string name) => Path.Combine(workingDirectory, TableNameWithExtension(name));
-        private string TableNameWithExtension(string name) => $"{name}{TABLE_EXTENSION}";
+        public string SchemaFilePath(string tableName) => Path.Combine(workingDirectory, tableName, $"{tableName}{SCHEMAS_EXTENSION}");
+        public string IndexFilePath(string tableName, string indexName) => Path.Combine(workingDirectory, tableName, $"{indexName}{INDEX_EXTENSION}");
+        public string TableDirectoryPath(string name) => Path.Combine(workingDirectory, name);
+        public string TableFilePath(string name) => Path.Combine(workingDirectory, name, $"{name}{TABLE_EXTENSION}");
         private bool TableExists(string name) => File.Exists(TableFilePath(name));
+
+        public void DeleteSchema(string tableName)
+        {
+            File.Delete(SchemaFilePath(tableName));
+        }
+
+        public void DeleteIndex(string tableName, string indexName)
+        {
+            File.Delete(IndexFilePath(tableName, indexName));
+        }
+
+        public void DeleteAllIndices(string tableName)
+        {
+            var indices = Directory.GetFiles(TableDirectoryPath(tableName));
+            foreach (string indexPath in indices)
+            {
+                File.Delete(indexPath);
+            }
+        }
     }
 }

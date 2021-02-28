@@ -8,7 +8,10 @@ namespace SharkBase.SystemStorage
         void DeleteTable(string name);
         long Append(string name, MemoryStream data);
         Stream GetTableStream(string name);
-        Stream GetSchemaStream(string databaseName);
-        Stream GetIndexStream(string indexName);
+        Stream GetSchemaStream(string tableName);
+        Stream GetIndexStream(string tableName, string indexName);
+        void DeleteSchema(string tableName);
+        void DeleteIndex(string tableName, string indexName);
+        void DeleteAllIndices(string tableName);
     }
 }
