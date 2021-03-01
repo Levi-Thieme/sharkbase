@@ -96,8 +96,6 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItUpdatesThePrimaryIndex()
             {
-                mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
-
                 table.InsertRecord(new Record(new List<Value>()));
 
                 mockIndices.Verify(indices => indices.Upsert(index), Times.Once);
@@ -106,8 +104,6 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItUpdatesTheDeletedIndex()
             {
-                mockStore.Setup(store => store.Append(It.IsAny<string>(), It.IsAny<MemoryStream>())).Returns(35);
-
                 table.InsertRecord(new Record(new List<Value>()));
 
                 mockIndices.Verify(indices => indices.Upsert<bool>(deletedIndex), Times.Once);
@@ -163,6 +159,16 @@ namespace SharkBase.UnitTests.DataAccess
                 table.DeleteRecord(record);
 
                 Assert.IsTrue(isDeletedIndex.GetValue(record.GetId()));
+            }
+
+            [TestMethod]
+            public void ItUpsertsTheIsDeletedIndex()
+            {
+                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+
+                table.DeleteRecord(record);
+
+                mockIndices.Verify(indices => indices.Upsert<bool>(isDeletedIndex), Times.Once);
             }
         }
     }

@@ -6,10 +6,12 @@ namespace SharkBase.SystemStorage
     {
         void InsertTable(string name);
         void DeleteTable(string name);
-        long Append(string name, MemoryStream data);
+        Stream GetDatabaseMetadataStream();
         Stream GetTableStream(string name);
         Stream GetSchemaStream(string tableName);
+        Stream GetOverwritingSchemaStream(string tableName);
         Stream GetIndexStream(string tableName, string indexName);
+        Stream GetOverwritingIndexStream(string tableName, string IndexName);
         void DeleteSchema(string tableName);
         void DeleteIndex(string tableName, string indexName);
         void DeleteAllIndices(string tableName);

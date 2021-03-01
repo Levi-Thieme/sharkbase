@@ -16,35 +16,49 @@ namespace SharkBase.Startup
     public class SharkBase : IDisposable
     {
         private string workingDirectory;
-        private string databaseName;
         private PhysicalStorage store;
         private ITables tables;
         private SchemaRepository schemas;
         private IndexRepository indices;
+        private DatabaseMetadata metadata;
+        private Parser parser;
+        private CommandBuilder commandBuilder;
 
         public SharkBase()
         {
             workingDirectory = string.Empty;
-            databaseName = string.Empty;
         }
 
         public void Connect(string databaseDirectory)
         {
             this.workingDirectory = databaseDirectory;
-            this.databaseName = Path.GetDirectoryName(this.workingDirectory);
             if (!Directory.Exists(databaseDirectory))
             {
                 throw new ArgumentException($"The location, {databaseDirectory}, does not exist.");
             }
-            var store = new FileStore(workingDirectory);
+            this.store = new FileStore(workingDirectory);
+            this.metadata = GetMetadata();
             this.indices = new FileIndices(store);
             this.schemas = new FileSchemas(store);
-            var tableNames = this.schemas.GetAllSchemas().Select(schema => schema.Name);
-            var tables = new Tables(store, new IdGenerator(), schemas, indices, tableNames);
-            this.tables = tables;
+            this.tables = new Tables(store, new IdGenerator(), schemas, indices, metadata.TableNames);
+            this.parser = BuildParser();
+            this.commandBuilder = BuildCommandBuilder();
         }
 
         public void Disconnect() => Dispose();
+
+        public ICommand Parse(string input)
+        {
+            if (parser.IsParsable(input)) 
+            {
+                var statement = parser.Parse(input);
+                return this.commandBuilder.Build(statement); 
+            }
+            else
+            {
+                throw new ArgumentException($"Unable to parser: {input}");
+            }
+        }
 
         private Parser BuildParser()
         {
@@ -62,9 +76,33 @@ namespace SharkBase.Startup
             return new CommandBuilder(this.tables, this.schemas);
         }
 
+        private DatabaseMetadata GetMetadata()
+        {
+            using (var stream = store.GetDatabaseMetadataStream())
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    string metadataJson = reader.BaseStream.Length > 0 ? reader.ReadString() : string.Empty;
+                    return string.IsNullOrEmpty(metadataJson) ? new DatabaseMetadata() : JsonConvert.DeserializeObject<DatabaseMetadata>(metadataJson);
+                }
+            }
+        }
+
+        private void SaveMetadata()
+        {
+            using (var stream = store.GetDatabaseMetadataStream())
+            {
+                using (var writer = new BinaryWriter(stream))
+                {
+                    writer.Write(JsonConvert.SerializeObject(metadata));
+                }
+            }
+        }
+
         public void Dispose()
         {
-            
+            this.metadata = new DatabaseMetadata(tables.TableNames());
+            SaveMetadata();
         }
     }
 }

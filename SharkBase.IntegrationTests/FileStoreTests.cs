@@ -12,7 +12,8 @@ namespace SharkBase.IntegrationTests
     public class FileStoreTests
     {
         private FileStore store;
-        private readonly string workingDirectory = Path.Join(Path.GetTempPath(), "integration_test_db");
+        private const string databaseName = "integration_test_db";
+        private readonly string workingDirectory = Path.Join(Path.GetTempPath(), databaseName);
         private const string tableName = "test";
 
         [TestInitialize]
@@ -45,6 +46,14 @@ namespace SharkBase.IntegrationTests
             store.DeleteTable(tableName);
 
             Assert.IsFalse(File.Exists(TablePath(tableName)));
+        }
+
+        [TestMethod]
+        public void WhenGettingTheDatabaseMetadataStream_AndTheFileDoesNotExist_ItCreatesIt()
+        {
+            store.GetDatabaseMetadataStream().Dispose();
+            
+            Assert.IsTrue(File.Exists(Path.Join(workingDirectory, $"{databaseName}.metadata")));
         }
 
         [TestMethod]

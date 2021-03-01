@@ -1,13 +1,4 @@
-﻿using Newtonsoft.Json;
-using SharkBase.Commands;
-using SharkBase.DataAccess;
-using SharkBase.Parsing;
-using SharkBase.QueryProcessing.Parsing;
-using SharkBase.SystemStorage;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System;
 
 namespace SharkBase
 {
@@ -15,22 +6,34 @@ namespace SharkBase
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Started Sharkbase");
-            string input = Console.ReadLine().Trim();
-            while (input.ToUpper() != "QUIT")
+            try
             {
-                try
+                using (var sharkBase = new Startup.SharkBase())
                 {
-                    throw new NotImplementedException();
+                    sharkBase.Connect("C:/Users/Levi/AppData/Local/Temp/test_db");
+                    string input = Console.ReadLine().Trim();
+                    while (input.ToUpper() != "QUIT")
+                    {
+                        try
+                        {
+                            var command = sharkBase.Parse(input);
+                            command.Execute();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"{e.Message}");
+                        }
+                        input = Console.ReadLine().Trim();
+                    }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}{Environment.NewLine}{e.StackTrace}");
-                }
-                input = Console.ReadLine().Trim();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e.Message}{Environment.NewLine}{e.StackTrace}");
             }
             Console.WriteLine("Quitting Sharkbase...");
         }
-
     }
+
 }
+

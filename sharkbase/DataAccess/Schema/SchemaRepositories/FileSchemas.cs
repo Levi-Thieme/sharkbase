@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SharkBase.Startup;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace SharkBase.DataAccess.Schema.Repositories
             var schemaColumns = DefaultColumns.ToList();
             schemaColumns.AddRange(columns);
             var schema = new TableSchema(name, schemaColumns);
-            using (var stream = store.GetSchemaStream(name))
+            using (var stream = store.GetOverwritingSchemaStream(name))
             {
                 string schemaJson = JsonConvert.SerializeObject(schema);
                 using (BinaryWriter writer = new BinaryWriter(stream))
@@ -41,11 +42,6 @@ namespace SharkBase.DataAccess.Schema.Repositories
         public void Remove(string name)
         {
             store.DeleteSchema(name);
-        }
-
-        public IEnumerable<TableSchema> GetAllSchemas()
-        {
-            throw new NotImplementedException();
         }
 
         public TableSchema GetSchema(string tableName)

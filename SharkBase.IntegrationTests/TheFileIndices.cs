@@ -104,5 +104,23 @@ namespace SharkBase.IntegrationTests
                 Assert.AreEqual(secondaryIndex, retrievedIndex);
             }
         }
+
+        [TestClass]
+        public class WhenUpsertingAnIndex : TheFileIndices
+        {
+            [TestMethod]
+            public void AndAnIndexHasBeenRemoved_ItOverwritesTheIndex()
+            {
+                primaryIndex.Add("second", 21L);
+                indices.Upsert(primaryIndex);
+
+                primaryIndex.Indices.Remove("second");
+                indices.Upsert(primaryIndex);
+
+                var retrievedIndex = indices.Get(table);
+
+                Assert.AreEqual(primaryIndex, retrievedIndex);
+            }
+        }
     }
 }

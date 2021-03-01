@@ -28,17 +28,35 @@ namespace SharkBase.DataAccess
 
         public void InsertRecord(Record record)
         {
-            using (var stream = new MemoryStream())
+            var primaryIndex = indices.Get(schema.Name);
+            var isDeletedIndex = indices.GetIsDeletedIndex(schema.Name);
+            using (var stream = store.GetTableStream(schema.Name))
             {
+                stream.Seek(0, SeekOrigin.End);
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
                     string guid = GetUniqueId().ToString();
+                    string replacedRecordId = string.Empty;
+                    long recordOffset = stream.Length;
+                    var deletedRecords = isDeletedIndex.Indices.Where(pair => pair.Value);
+                    if (deletedRecords.Any())
+                    {
+                        replacedRecordId = deletedRecords.First().Key;
+                        recordOffset = primaryIndex.GetValue(replacedRecordId);
+                    }
+                    stream.Seek(recordOffset, SeekOrigin.Begin);
                     writer.Write(guid);
                     writer.Write(false);
                     record.WriteTo(writer);
-                    long recordOffset = store.Append(schema.Name, stream);
                     insertPrimaryIndex(guid, recordOffset);
                     insertIsDeletedIndex(guid);
+                    if (replacedRecordId != string.Empty)
+                    {
+                        isDeletedIndex.Remove(replacedRecordId);
+                        indices.Upsert(isDeletedIndex);
+                        primaryIndex.Remove(replacedRecordId);
+                        indices.Upsert(primaryIndex);
+                    }
                 }
             }
         }
@@ -141,7 +159,9 @@ namespace SharkBase.DataAccess
             long isDeletedOffset = indices.Get(schema.Name).GetValue(id) + binaryGuidLength;
             stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
             stream.Write(true);
-            indices.GetIsDeletedIndex(schema.Name).Update(id, true);
+            var isDeleted = indices.GetIsDeletedIndex(schema.Name);
+            isDeleted.Update(id, true);
+            indices.Upsert<bool>(isDeleted);
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();

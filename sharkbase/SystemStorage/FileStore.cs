@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using SharkBase.DataAccess;
 
 namespace SharkBase.SystemStorage
 {
@@ -11,6 +10,7 @@ namespace SharkBase.SystemStorage
         private const string TABLE_EXTENSION = ".table";
         private const string SCHEMAS_EXTENSION = ".schema";
         private const string INDEX_EXTENSION = ".index";
+        private const string METADATA_EXTENSION = ".metadata";
 
         public FileStore(string workingDirectory)
         {
@@ -29,19 +29,12 @@ namespace SharkBase.SystemStorage
                 File.Delete(TableFilePath(name));
         }
 
-        public long Append(string table, MemoryStream stream)
-        {
-            using (FileStream fstream = new FileStream(TableFilePath(table), FileMode.Append))
-            {
-                long startPosition = fstream.Position;
-                stream.WriteTo(fstream);
-                return startPosition;
-            }
-        }
-
+        public Stream GetDatabaseMetadataStream() => new FileStream(DatabaseMetadataPath(), FileMode.OpenOrCreate);
         public Stream GetTableStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
         public Stream GetSchemaStream(string tableName) => new FileStream(SchemaFilePath(tableName), FileMode.OpenOrCreate);
+        public Stream GetOverwritingSchemaStream(string tableName) => new FileStream(SchemaFilePath(tableName), FileMode.Truncate);
         public Stream GetIndexStream(string tableName, string indexName) => new FileStream(IndexFilePath(tableName, indexName), FileMode.OpenOrCreate);
+        public Stream GetOverwritingIndexStream(string tableName, string indexName) => new FileStream(IndexFilePath(tableName, indexName), FileMode.Truncate);
 
         internal IEnumerable<string> GetTableNames()
         {
@@ -52,6 +45,11 @@ namespace SharkBase.SystemStorage
                 .Select(file => Path.GetFileNameWithoutExtension(file));
         }
 
+        public string DatabaseMetadataPath()
+        {
+            string databaseName = new DirectoryInfo(workingDirectory).Name;
+            return Path.Combine(workingDirectory, $"{databaseName}{METADATA_EXTENSION}");
+        }
         public string SchemaFilePath(string tableName) => Path.Combine(workingDirectory, tableName, $"{tableName}{SCHEMAS_EXTENSION}");
         public string IndexFilePath(string tableName, string indexName) => Path.Combine(workingDirectory, tableName, $"{indexName}{INDEX_EXTENSION}");
         public string TableDirectoryPath(string name) => Path.Combine(workingDirectory, name);
@@ -61,7 +59,7 @@ namespace SharkBase.SystemStorage
         public void DeleteSchema(string tableName)
         {
             File.Delete(SchemaFilePath(tableName));
-        }
+        } 
 
         public void DeleteIndex(string tableName, string indexName)
         {

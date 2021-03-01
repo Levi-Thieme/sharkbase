@@ -18,7 +18,7 @@ namespace SharkBase.DataAccess.Index.Repositories
 
         public void Upsert(PrimaryIndex index)
         {
-            using (var stream = store.GetIndexStream(index.Table, index.Name))
+            using (var stream = store.GetOverwritingIndexStream(index.Table, index.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {
@@ -29,7 +29,7 @@ namespace SharkBase.DataAccess.Index.Repositories
 
         public void Upsert<K>(SecondaryIndex<K> index)
         {
-            using (var stream = store.GetIndexStream(index.Table, index.Name))
+            using (var stream = store.GetOverwritingIndexStream(index.Table, index.Name))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
                 {

@@ -3,7 +3,6 @@ using SharkBase.DataAccess.Index.Models;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SharkBase.DataAccess
@@ -15,6 +14,7 @@ namespace SharkBase.DataAccess
         private SchemaRepository schemas;
         private IndexRepository indices;
         private List<string> tables;
+        public IEnumerable<string> TableNames() => tables;
         
         public Tables(PhysicalStorage storage, IGenerateId idGenerator, SchemaRepository schemas, IndexRepository indices, IEnumerable<string> tables)
         {
