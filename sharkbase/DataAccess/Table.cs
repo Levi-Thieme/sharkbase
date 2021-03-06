@@ -48,31 +48,17 @@ namespace SharkBase.DataAccess
                     writer.Write(guid);
                     writer.Write(false);
                     record.WriteTo(writer);
-                    insertPrimaryIndex(guid, recordOffset);
-                    insertIsDeletedIndex(guid);
+                    primaryIndex.Add(guid, recordOffset);
+                    isDeletedIndex.Add(guid, false);
                     if (replacedRecordId != string.Empty)
                     {
                         isDeletedIndex.Remove(replacedRecordId);
-                        indices.Upsert(isDeletedIndex);
                         primaryIndex.Remove(replacedRecordId);
-                        indices.Upsert(primaryIndex);
                     }
+                    indices.Upsert(primaryIndex);
+                    indices.Upsert(isDeletedIndex);
                 }
             }
-        }
-
-        private void insertPrimaryIndex(string guid, long offset)
-        {
-            var primaryIndex = indices.Get(schema.Name);
-            primaryIndex.Add(guid, offset);
-            indices.Upsert(primaryIndex);
-        }
-
-        private void insertIsDeletedIndex(string guid)
-        {
-            var deletedIndex = indices.GetIsDeletedIndex(schema.Name);
-            deletedIndex.Add(guid, false);
-            indices.Upsert<bool>(deletedIndex);
         }
 
         public Record ReadRecord()

@@ -32,9 +32,20 @@ namespace SharkBase.SystemStorage
         public Stream GetDatabaseMetadataStream() => new FileStream(DatabaseMetadataPath(), FileMode.OpenOrCreate);
         public Stream GetTableStream(string table) => new FileStream(TableFilePath(table), FileMode.Open);
         public Stream GetSchemaStream(string tableName) => new FileStream(SchemaFilePath(tableName), FileMode.OpenOrCreate);
-        public Stream GetOverwritingSchemaStream(string tableName) => new FileStream(SchemaFilePath(tableName), FileMode.Truncate);
+        public Stream GetOverwritingSchemaStream(string tableName)
+        {
+            return SchemaExists(tableName) ?
+                new FileStream(SchemaFilePath(tableName), FileMode.Truncate) :
+                GetSchemaStream(tableName);
+
+        }
         public Stream GetIndexStream(string tableName, string indexName) => new FileStream(IndexFilePath(tableName, indexName), FileMode.OpenOrCreate);
-        public Stream GetOverwritingIndexStream(string tableName, string indexName) => new FileStream(IndexFilePath(tableName, indexName), FileMode.Truncate);
+        public Stream GetOverwritingIndexStream(string tableName, string indexName)
+        {
+            return IndexExists(tableName, indexName) ?
+                new FileStream(IndexFilePath(tableName, indexName), FileMode.Truncate) :
+                GetIndexStream(tableName, indexName);
+        }
 
         internal IEnumerable<string> GetTableNames()
         {
@@ -51,7 +62,9 @@ namespace SharkBase.SystemStorage
             return Path.Combine(workingDirectory, $"{databaseName}{METADATA_EXTENSION}");
         }
         public string SchemaFilePath(string tableName) => Path.Combine(workingDirectory, tableName, $"{tableName}{SCHEMAS_EXTENSION}");
+        public bool SchemaExists(string tableName) => File.Exists(SchemaFilePath(tableName));
         public string IndexFilePath(string tableName, string indexName) => Path.Combine(workingDirectory, tableName, $"{indexName}{INDEX_EXTENSION}");
+        public bool IndexExists(string tableName, string IndexName) => File.Exists(IndexFilePath(tableName, IndexName));
         public string TableDirectoryPath(string name) => Path.Combine(workingDirectory, name);
         public string TableFilePath(string name) => Path.Combine(workingDirectory, name, $"{name}{TABLE_EXTENSION}");
         private bool TableExists(string name) => File.Exists(TableFilePath(name));

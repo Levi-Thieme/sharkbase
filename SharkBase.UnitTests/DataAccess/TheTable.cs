@@ -86,7 +86,7 @@ namespace SharkBase.UnitTests.DataAccess
             }
 
             [TestMethod]
-            public void ItGetsThePrimaryIndex()
+            public void ItGetsThePrimaryIndexOnce()
             {
                 table.InsertRecord(new Record(new List<Value>()));
 
@@ -99,6 +99,14 @@ namespace SharkBase.UnitTests.DataAccess
                 table.InsertRecord(new Record(new List<Value>()));
 
                 mockIndices.Verify(indices => indices.Upsert(index), Times.Once);
+            }
+
+            [TestMethod]
+            public void ItGetsTheIsDeletedIndexOnce()
+            {
+                table.InsertRecord(new Record(new List<Value>()));
+
+                mockIndices.Verify(indices => indices.GetIsDeletedIndex(tableName), Times.Once);
             }
 
             [TestMethod]
