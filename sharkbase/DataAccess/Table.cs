@@ -105,7 +105,7 @@ namespace SharkBase.DataAccess
                 if (ColumnType.Int64 == type)
                     values.Add(reader.ReadInt64());
                 else if (ColumnType.String == type)
-                    values.Add(reader.ReadString());
+                    values.Add(reader.ReadString().Trim());
                 else if (ColumnType.boolean == type)
                     values.Add(reader.ReadBoolean());
             }

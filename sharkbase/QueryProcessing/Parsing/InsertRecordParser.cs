@@ -27,7 +27,7 @@ namespace SharkBase.QueryProcessing.Parsing
                 throw new ArgumentException("An insert record statement requires a table name.");
             string tableName = tokens[2];
             var columnValues = Parser.GetColumnValues(tokens.Skip(3));
-            var updatedColumnValues = padOrTruncateStrings(schemaProvider.GetSchema(tableName).Columns, columnValues);
+            var updatedColumnValues = padOrTruncateStrings(schemaProvider.GetSchema(tableName).Columns.Where(c => !c.HasDefaultValue), columnValues);
             return new InsertRecordStatement(tableName, updatedColumnValues, new InsertRecordValidator(this.schemaProvider));
         }
 
