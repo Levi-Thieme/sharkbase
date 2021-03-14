@@ -17,7 +17,10 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestInitialize]
         public void Initialize()
         {
-            parser = new InsertRecordParser(new Mock<SchemaRepository>().Object);
+            var mockSchemas = new Mock<SchemaRepository>();
+            var schema = new TableSchema("FOOD", new List<Column> { new Column(ColumnType.String, "NAME", size: 4) });
+            mockSchemas.Setup(schemas => schemas.GetSchema("FOOD")).Returns(schema);
+            parser = new InsertRecordParser(mockSchemas.Object);
         }
 
         [TestMethod]
@@ -49,22 +52,11 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         [TestMethod]
         public void GivenAValidInput_ItReturnsAStatementWithColumnValues()
         {
-            var expected = new List<string> { "1", "Tacos are good.", "30" };
+            var expected = new List<string> { "test", "30" };
 
-            var statement = parser.Parse("INSERT INTO FOOD 1 'Tacos are good.' 30");
+            var statement = parser.Parse("INSERT INTO FOOD 'test' 30");
 
             CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
-        }
-
-        [TestMethod]
-        public void GivenAValidInputEndingWithASingleQuoteToCloseAStringLiteral_ItReturnsColumnValues()
-        {
-            var input = new List<string> { "1", "'Tacos'" };
-            var expected = new List<string> { "1", "Tacos" };
-
-            var values = parser.GetColumnValues(input.ToArray());
-
-            CollectionAssert.AreEqual(expected, values.ToList());
         }
 
         [TestMethod]
@@ -77,6 +69,27 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         public void GivenAStringLiteralIsMissingAnOpeningSingleQuote_ItThrowsAnException()
         {
             Assert.ThrowsException<ArgumentException>(() => parser.Parse("INSERT INTO FOOD 1 TACOS' 30"));
+        }
+
+        [TestMethod]
+        public void ItTruncatesStringsToFitInTheirColumn()
+        {
+            var expected = new List<string> { "taco" };
+
+            var statement = parser.Parse("INSERT INTO FOOD tacos");
+
+            CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
+
+        }
+
+        [TestMethod]
+        public void ItPadsStringsToFitInTheirColumn()
+        {
+            var expected = new List<string> { "ta  " };
+
+            var statement = parser.Parse("INSERT INTO FOOD ta");
+
+            CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
         }
     }
 }

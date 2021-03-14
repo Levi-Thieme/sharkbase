@@ -25,11 +25,25 @@ namespace SharkBase.QueryProcessing.Parsing
             string[] tokens = Parser.TokenizeStatement(input);
             if (tokens.Length < 3)
                 throw new ArgumentException("An insert record statement requires a table name.");
-            var columnValues = GetColumnValues(tokens.Skip(3));
-            return new InsertRecordStatement(tokens[2], columnValues, new InsertRecordValidator(this.schemaProvider));
+            string tableName = tokens[2];
+            var columnValues = Parser.GetColumnValues(tokens.Skip(3));
+            var updatedColumnValues = padOrTruncateStrings(schemaProvider.GetSchema(tableName).Columns, columnValues);
+            return new InsertRecordStatement(tableName, updatedColumnValues, new InsertRecordValidator(this.schemaProvider));
         }
 
-        public IEnumerable<string> GetColumnValues(IEnumerable<string> tokens) => Parser.GetColumnValues(tokens);
+        private IEnumerable<string> padOrTruncateStrings(IEnumerable<Column> columns, IEnumerable<string> columnValues)
+        {
+            var updatedValues = columnValues.ToList();
+            for (int i = 0; i < columns.Count(); i++)
+            {
+                var column = columns.ElementAt(i);
+                if (columns.ElementAt(i).Type == ColumnType.String)
+                {
+                    updatedValues[i] = updatedValues[i].Length > column.Size ? updatedValues[i].Substring(0, column.Size) : updatedValues[i].PadRight(column.Size);
+                }
+            }
+            return updatedValues;
+        }
         
     }
 }
