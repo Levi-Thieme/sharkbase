@@ -16,7 +16,6 @@ namespace SharkBase.Commands
 
         public void Execute()
         {
-            statement.ParseColumnDefinitions();
             tables.Create(statement.Table, statement.Columns);
         }
     }

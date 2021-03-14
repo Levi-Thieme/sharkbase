@@ -13,10 +13,12 @@ namespace SharkBase.DataAccess
 
     public class ColumnTypes
     {
+        public const string StringType = "STRING";
+
         private static readonly IEnumerable<string> types = new List<string>
         {
             "INT64",
-            "STRING",
+            StringType,
             "BOOLEAN"
         };
 
@@ -25,7 +27,7 @@ namespace SharkBase.DataAccess
         public static Dictionary<string, ColumnType> ColumnTypeByName = new Dictionary<string, ColumnType>
         {
             { "INT64", ColumnType.Int64 },
-            { "STRING", ColumnType.String },
+            { StringType, ColumnType.String },
             { "BOOLEAN", ColumnType.boolean }
         };
 

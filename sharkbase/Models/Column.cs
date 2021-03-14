@@ -5,21 +5,21 @@
         public readonly ColumnType Type;
         public readonly string Name;
         public readonly bool HasDefaultValue;
+        public readonly int Size;
 
-        public Column(ColumnType type, string name, bool hasDefaultValue = false)
+        public Column(ColumnType type, string name, bool hasDefaultValue = false, int size = 0)
         {
             this.Type = type;
             this.Name = name;
             this.HasDefaultValue = hasDefaultValue;
+            this.Size = size;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is Column)
+            if (obj is Column other)
             {
-                var other = (Column)obj;
-                return this.Type == other.Type &&
-                    this.Name == other.Name;
+                return this.Type == other.Type && this.Name == other.Name;
             }
             return false;
         }

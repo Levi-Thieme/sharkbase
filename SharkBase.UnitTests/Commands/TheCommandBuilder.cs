@@ -28,7 +28,7 @@ namespace SharkBase.UnitTests.Commands
         [TestMethod]
         public void GivenAnInsertTableStatement_ItBuildsAnInsertTableCommand()
         {
-            var command = builder.Build(new InsertTableStatement(null));
+            var command = builder.Build(new InsertTableStatement(null, null, null));
 
             Assert.IsInstanceOfType(command, typeof(InsertTableCommand));
         }

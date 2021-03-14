@@ -12,14 +12,13 @@ namespace SharkBase.UnitTests.Statements
     public class TheInsertTableStatement
     {
         private Mock<IStatementValidator> validatorMock;
-        private List<string> tokens = new List<string> { "INT64", "ID", "STRING", "NAME" };
         private InsertTableStatement statement;
 
         [TestInitialize]
         public void Initialize()
         {
             validatorMock = new Mock<IStatementValidator>();
-            statement = new InsertTableStatement(validatorMock.Object) { Table = "test", Tokens = tokens };
+            statement = new InsertTableStatement(validatorMock.Object, "test", new List<Column>());
         }
 
         [TestMethod]
@@ -27,22 +26,7 @@ namespace SharkBase.UnitTests.Statements
         {
             statement.Validate();
 
-            validatorMock.Verify(validator => validator.Validate("test", tokens), Times.Once);
-        }
-
-        [TestMethod]
-        public void ParsesColumnDefinitions()
-        {
-            var expectedColumnDefinitions = new List<Column>
-            {
-                new Column(ColumnType.Int64, "ID"),
-                new Column(ColumnType.String, "NAME")
-            };
-            var statement = new InsertTableStatement(validatorMock.Object) { Table = "test", Tokens = tokens };
-
-            statement.ParseColumnDefinitions();
-
-            CollectionAssert.AreEqual(expectedColumnDefinitions, statement.Columns.ToList());
+            validatorMock.Verify(validator => validator.Validate("test", statement.Tokens), Times.Once);
         }
     }
 }

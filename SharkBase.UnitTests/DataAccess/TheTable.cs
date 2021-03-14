@@ -101,20 +101,33 @@ namespace SharkBase.UnitTests.DataAccess
                 mockIndices.Verify(indices => indices.Upsert(index), Times.Once);
             }
 
-            [TestMethod]
-            public void ItGetsTheIsDeletedIndexOnce()
+            [TestClass]
+            public class AndADeletedRecordExists : WhenInsertingARecord
             {
-                table.InsertRecord(new Record(new List<Value>()));
+                private const string deletedRecordId = "12345";
 
-                mockIndices.Verify(indices => indices.GetIsDeletedIndex(tableName), Times.Once);
-            }
+                [TestInitialize]
+                public void Setup()
+                {
+                    index.Add(deletedRecordId, 0);
+                    deletedIndex.Add(deletedRecordId, true);
+                }
 
-            [TestMethod]
-            public void ItUpdatesTheDeletedIndex()
-            {
-                table.InsertRecord(new Record(new List<Value>()));
+                [TestMethod]
+                public void ItRemovesTheDeletedRecordsPrimaryIndex()
+                {
+                    table.InsertRecord(new Record(new List<Value>()));
 
-                mockIndices.Verify(indices => indices.Upsert<bool>(deletedIndex), Times.Once);
+                    mockIndices.Verify(indices => indices.Upsert(It.Is<PrimaryIndex>(index => index.HasKey(deletedRecordId) == false)));
+                }
+
+                [TestMethod]
+                public void ItRemovesTheDeletedRecordsIsDeletedIndex()
+                {
+                    table.InsertRecord(new Record(new List<Value>()));
+
+                    mockIndices.Verify(indices => indices.Upsert<bool>(It.Is<SecondaryIndex<bool>>(index => index.HasKey(deletedRecordId) == false)));
+                }
             }
         }
 
