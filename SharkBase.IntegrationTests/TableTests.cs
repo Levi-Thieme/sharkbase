@@ -45,7 +45,7 @@ namespace SharkBase.IntegrationTests
             tables.Create(tableName, columns);
             this.table = tables.GetByName(tableName) as Table;
             insertionRecord = new Record(new List<Value> { new StringValue("pizza"), new LongValue(9001L) });
-            expectedRecord = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new StringValue("pizza"), new LongValue(9001L) });
+            expectedRecord = new Record(new List<Value> { new StringValue(guid.ToString()), new StringValue("pizza"), new LongValue(9001L) });
         }
 
         [TestCleanup]
@@ -60,7 +60,7 @@ namespace SharkBase.IntegrationTests
             table.InsertRecord(insertionRecord);
 
             long length = new FileInfo(tablePath("test")).Length;
-            Assert.AreEqual(52, length);
+            Assert.AreEqual(51, length);
         }
 
         [TestMethod]

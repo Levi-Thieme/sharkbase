@@ -7,7 +7,7 @@ namespace SharkBase.Models.Values
 {
     public class BoolValue : Value
     {
-        private bool value;
+        public bool value { get; private set; }
 
         public BoolValue() { }
 
@@ -33,7 +33,7 @@ namespace SharkBase.Models.Values
 
         public override bool Equals(object obj)
         {
-            return obj is bool other && this.value == other;
+            return obj is BoolValue other && this.value == other.value;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace SharkBase.Models.Values
 {
     public class StringValue : Value
     {
-        private string value;
+        public string value { get; private set; }
 
         public StringValue()
         {
@@ -36,7 +36,7 @@ namespace SharkBase.Models.Values
 
         public override bool Equals(object obj)
         {
-            return obj is string other && this.value == other;
+            return obj is StringValue other && this.value == other.value;
         }
     }
 }

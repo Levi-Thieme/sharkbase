@@ -7,7 +7,7 @@ namespace SharkBase.Models.Values
 {
     public class LongValue : Value
     {
-        private long value;
+        public long value { get; private set; }
 
         public LongValue() { }
 
@@ -33,7 +33,7 @@ namespace SharkBase.Models.Values
 
         public override bool Equals(object obj)
         {
-            return obj is long other && this.value == other;
+            return obj is LongValue other && this.value == other.value;
         }
     }
 }

@@ -145,22 +145,12 @@ namespace SharkBase.UnitTests.DataAccess
                 mockIndices = new Mock<IndexRepository>();
                 schema = new TableSchema(tableName, new List<Column>());
                 index = new PrimaryIndex(tableName, new Dictionary<string, long> { { guid.ToString(), 0L } });
-                isDeletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool> { { guid.ToString(), false } });
+                isDeletedIndex = new SecondaryIndex<bool>(tableName, IndexNames.IS_DELETED, new Dictionary<string, bool>());
                 table = new Table(mockStore.Object, schema, mockIndices.Object, mockIdGenerator.Object);
                 mockIdGenerator.Setup(g => g.GetUniqueId()).Returns(guid);
                 mockIndices.Setup(indices => indices.Get(tableName)).Returns(index);
                 mockIndices.Setup(indices => indices.GetIsDeletedIndex(tableName)).Returns(isDeletedIndex);
                 mockStore.Setup(store => store.GetTableStream(It.IsAny<string>())).Returns(new MemoryStream());
-            }
-
-            [TestMethod]
-            public void ItGetsThePrimaryIndex()
-            {
-                var record = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new LongValue(100L) });
-
-                table.DeleteRecord(record);
-
-                mockIndices.Verify(indices => indices.Get(schema.Name), Times.Once);
             }
 
             [TestMethod]
