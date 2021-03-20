@@ -36,7 +36,7 @@ namespace SharkBase.Models.Values
 
         public override bool Equals(object obj)
         {
-            return obj is StringValue other && this.value == other.value;
+            return obj is StringValue other && this.value.Trim() == other.value.Trim();
         }
     }
 }
