@@ -27,14 +27,14 @@ namespace SharkBase.UnitTests.DataAccess
             mockSchemas = new Mock<SchemaRepository>();
             mockIndices = new Mock<IndexRepository>();
             tables = new Tables(mockStore.Object, mockIdGenerator.Object, mockSchemas.Object, mockIndices.Object, new List<string> { "existing_table" });
-            columns = new List<Column> { new Column(ColumnType.Int64, "cost") };
+            columns = new List<Column> { new Column(DataTypes.Int64, "cost") };
             expectedSchema = new TableSchema(
                "test",
                new List<Column>
                {
-                    new Column(ColumnType.String, "ID"),
-                    new Column(ColumnType.boolean, "DELETED"),
-                    new Column(ColumnType.Int64, "cost")
+                    new Column(DataTypes.String, "ID"),
+                    new Column(DataTypes.boolean, "DELETED"),
+                    new Column(DataTypes.Int64, "cost")
                }
            );
         }

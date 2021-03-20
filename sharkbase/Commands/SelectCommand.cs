@@ -24,7 +24,7 @@ namespace SharkBase.Commands
             {
                 int columnIndex = table.Schema.Columns.ToList().FindIndex(c => c.Name == statement.Tokens.First());
                 var type = table.Schema.Columns.ElementAt(columnIndex).Type;
-                var value = new Value(new ValueParser().ParseValue(statement.Tokens.ElementAt(1), type));
+                var value = new ValueParser().ParseValue(statement.Tokens.ElementAt(1), type);
                 records = records.Where(record => record.Values.ElementAt(columnIndex).Equals(value));
             }
             if (records.Any())

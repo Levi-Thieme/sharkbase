@@ -1,4 +1,5 @@
 ﻿using SharkBase.Models;
+using SharkBase.Models.Values;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace SharkBase.DataAccess
 {
-    public class Record
+    public class Record : Writable
     {
         public IEnumerable<Value> Values { get; set; } = new List<Value>();
 
@@ -20,27 +21,13 @@ namespace SharkBase.DataAccess
             Values = values;
         }
 
-        public void WriteTo(BinaryWriter writer)
+        public void Write(BinaryWriter writer)
         {
             foreach (var value in Values)
-                value.WriteTo(writer);
+                value.Write(writer);
         }
 
         public string GetId() => Values.Any() ? Values.First().ToString() : string.Empty;
-
-        public bool IsDeleted() => Values.Count() >= 2 ? (bool)Values.ElementAt(1).value : false;
-
-        public void Delete()
-        {
-            var values = Values.ToList();
-            if (values.Count() < 2)
-                throw new Exception("Unable to set a record with less than two values as deleted");
-            else
-            {
-                values[1] = new Value(true);
-                this.Values = values;
-            }
-        }
 
         public override bool Equals(object obj)
         {

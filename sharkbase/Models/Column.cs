@@ -2,12 +2,12 @@
 {
     public class Column
     {
-        public readonly ColumnType Type;
+        public readonly DataTypes Type;
         public readonly string Name;
         public readonly bool HasDefaultValue;
         public readonly int Size;
 
-        public Column(ColumnType type, string name, bool hasDefaultValue = false, int size = 0)
+        public Column(DataTypes type, string name, bool hasDefaultValue = false, int size = 0)
         {
             this.Type = type;
             this.Name = name;

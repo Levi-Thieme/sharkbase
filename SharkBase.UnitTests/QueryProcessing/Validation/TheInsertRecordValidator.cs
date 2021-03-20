@@ -18,7 +18,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Validation
         {
             mockSchemas = new Mock<SchemaRepository>();
             mockSchemas.Setup(schemas => schemas.GetSchema("Foods"))
-                .Returns(new TableSchema("Foods", new List<Column> { new Column(ColumnType.Int64, "ID"), new Column(ColumnType.String, "DELETED", true) }));
+                .Returns(new TableSchema("Foods", new List<Column> { new Column(DataTypes.Int64, "ID"), new Column(DataTypes.String, "DELETED", true) }));
             validator = new InsertRecordValidator(mockSchemas.Object);
         }
 

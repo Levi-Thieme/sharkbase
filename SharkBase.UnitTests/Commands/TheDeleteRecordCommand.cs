@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using SharkBase.Models.Values;
 
 namespace SharkBase.UnitTests.Commands
 {
@@ -24,14 +25,14 @@ namespace SharkBase.UnitTests.Commands
         public void Initialize()
         {
             statement = new DeleteRecordStatement("test", new List<string> { "ID", "4" }, new Mock<IStatementValidator>().Object);
-            var schema = new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, "ID") });
+            var schema = new TableSchema("test", new List<Column> { new Column(DataTypes.Int64, "ID") });
             mockTable = new Mock<ITable>();
             mockTable.SetupGet(table => table.Schema).Returns(schema);
             command = new DeleteRecordCommand(statement, mockTable.Object);
             this.records = new List<Record>
             {
-                new Record(new List<Value> { new Value("4") }),
-                new Record(new List<Value> { new Value("5") })
+                new Record(new List<Value> { new StringValue("4") }),
+                new Record(new List<Value> { new StringValue("5") })
             };
             mockTable.Setup(table => table.ReadAllRecords()).Returns(records);
         }

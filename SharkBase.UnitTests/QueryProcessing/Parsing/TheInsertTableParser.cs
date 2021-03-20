@@ -60,8 +60,8 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         {
             var expected = new List<Column>
             {
-                new Column(ColumnType.Int64, "ID"),
-                new Column(ColumnType.String, "NAME", size: 48)
+                new Column(DataTypes.Int64, "ID"),
+                new Column(DataTypes.String, "NAME", size: 48)
             };
 
             var insertStatement = parser.Parse("INSERT TABLE FOOD ID INT64 NAME STRING(48)") as InsertTableStatement;

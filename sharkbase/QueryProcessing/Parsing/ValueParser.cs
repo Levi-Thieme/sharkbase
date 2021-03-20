@@ -1,4 +1,5 @@
 ﻿using SharkBase.DataAccess;
+using SharkBase.Models.Values;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace SharkBase.Parsing
         public long ParseInt(string value);
         public string ParseString(string value);
         public bool ParseBoolean(string value);
-        public object ParseValue(string value, ColumnType type);
-        public IEnumerable<object> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns);
+        public Value ParseValue(string value, DataTypes type);
+        public IEnumerable<Value> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns);
     }
 
     public class ValueParser : IValueParser
@@ -31,25 +32,22 @@ namespace SharkBase.Parsing
             return bool.Parse(value);
         }
 
-        public object ParseValue(string value, ColumnType type)
+        public Value ParseValue(string value, DataTypes type)
         {
-            if (type == ColumnType.Int64)
-                return ParseInt(value);
-            else if (type == ColumnType.String)
-                return ParseString(value);
-            else if (type == ColumnType.boolean)
-                return ParseBoolean(value);
+            if (type == DataTypes.Int64)
+                return new LongValue(ParseInt(value));
+            else if (type == DataTypes.String)
+                return new StringValue(ParseString(value));
+            else if (type == DataTypes.boolean)
+                return new BoolValue(ParseBoolean(value));
             throw new ArgumentException("The column type did not correspond to an existing column type.");
         }
 
-        public IEnumerable<object> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns)
+        public IEnumerable<Value> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns)
         {
-            var values = new List<object>();
+            var values = new List<Value>();
             var parser = new ValueParser();
-            for (int i = 0; i < tableColumns.Count(); i++)
-            {
-                string value = columnValues.ElementAt(i);
-                var column = tableColumns.ElementAt(i);
+            foreach (var (column, value) in tableColumns.Zip(columnValues)) {
                 try
                 {
                     values.Add(parser.ParseValue(value, column.Type));

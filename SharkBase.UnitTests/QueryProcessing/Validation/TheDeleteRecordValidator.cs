@@ -18,7 +18,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Validation
         [TestInitialize]
         public void Initialize()
         {
-            this.schema = new TableSchema("test", new List<Column> { new Column(ColumnType.Int64, "ID") });
+            this.schema = new TableSchema("test", new List<Column> { new Column(DataTypes.Int64, "ID") });
             this.mockSchemas = new Mock<SchemaRepository>();
             this.mockSchemas.Setup(schemas => schemas.GetSchema(schema.Name)).Returns(schema);
             this.validator = new DeleteRecordValidator(mockSchemas.Object);

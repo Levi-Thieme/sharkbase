@@ -1,6 +1,7 @@
 ﻿using SharkBase.DataAccess.Index;
 using SharkBase.DataAccess.Index.Models;
 using SharkBase.Models;
+using SharkBase.Models.Values;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -46,10 +47,8 @@ namespace SharkBase.DataAccess
                     }
                     stream.Seek(recordOffset, SeekOrigin.Begin);
                     writer.Write(guid);
-                    writer.Write(false);
-                    record.WriteTo(writer);
+                    record.Write(writer);
                     primaryIndex.Add(guid, recordOffset);
-                    isDeletedIndex.Add(guid, false);
                     if (replacedRecordId != string.Empty)
                     {
                         isDeletedIndex.Remove(replacedRecordId);
@@ -63,23 +62,23 @@ namespace SharkBase.DataAccess
 
         public Record ReadRecord()
         {
-            Record defaultDeletedRecord = new Record(new List<Value> { new Value(Guid.NewGuid().ToString()), new Value(true) });
-            var record = defaultDeletedRecord;
+            Record record = null;
             using (var stream = store.GetTableStream(schema.Name))
             {
                 using (var reader = new BinaryReader(stream, Encoding.UTF8))
                 {
-                    while (reader.BaseStream.Position != reader.BaseStream.Length && record.IsDeleted())
+                    if (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
                         record = readRecordFromStream(reader);
                     } 
                 }
             }
-            return record.IsDeleted() ? null : record;
+            return record;
         }
 
         public IEnumerable<Record> ReadAllRecords()
         {
+            var isDeletedIndex = indices.GetIsDeletedIndex(schema.Name);
             List<Record> records = new List<Record>();
             using (var stream = store.GetTableStream(schema.Name))
             {
@@ -89,7 +88,7 @@ namespace SharkBase.DataAccess
                     while (reader.BaseStream.Position < streamLength)
                     {
                         var record = readRecordFromStream(reader);
-                        if (!record.IsDeleted())
+                        if (!isDeletedIndex.Indices.ContainsKey(record.GetId()))
                             records.Add(record);
                     }
                 }
@@ -99,55 +98,46 @@ namespace SharkBase.DataAccess
 
         private Record readRecordFromStream(BinaryReader reader)
         {
-            var values = new List<object>();
+            var values = new List<Value>();
             foreach (var type in schema.Columns.Select(c => c.Type))
             {
-                if (ColumnType.Int64 == type)
-                    values.Add(reader.ReadInt64());
-                else if (ColumnType.String == type)
-                    values.Add(reader.ReadString().Trim());
-                else if (ColumnType.boolean == type)
-                    values.Add(reader.ReadBoolean());
+                Value value = null;
+                if (DataTypes.Int64 == type)
+                {
+                    value = new LongValue();
+                    value.Read(reader);
+                }
+                else if (DataTypes.String == type)
+                {
+                    value = new StringValue();
+                    value.Read(reader);
+                }
+                else if (DataTypes.boolean == type)
+                {
+                    value = new BoolValue();
+                    value.Read(reader);
+                }
+                if (value != null)
+                {
+                    values.Add(value);
+                }
             }
-            return new Record(values.Select(v => new Value(v)));
+            return new Record(values);
         }
 
         public void DeleteRecords(IEnumerable<Record> records)
         {
-            using (var stream = store.GetTableStream(schema.Name))
-            {
-                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    foreach (var record in records)
-                    {
-                        deleteRecord(record, writer);
-                    }
-                }
-            }
+            var isDeletedIndex = indices.GetIsDeletedIndex(schema.Name);
+            foreach (var record in records)
+                isDeletedIndex.Add(record.GetId(), true);
+            indices.Upsert(isDeletedIndex);
         }
 
         public void DeleteRecord(Record record)
         {
-            record.Delete();
-            using (var stream = store.GetTableStream(schema.Name))
-            {
-                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: false))
-                {
-                    deleteRecord(record, writer);
-                }
-            }
-        }
-
-        private void deleteRecord(Record record, BinaryWriter stream)
-        {
-            const int binaryGuidLength = 37;
-            string id = record.GetId();
-            long isDeletedOffset = indices.Get(schema.Name).GetValue(id) + binaryGuidLength;
-            stream.BaseStream.Seek(isDeletedOffset, SeekOrigin.Begin);
-            stream.Write(true);
-            var isDeleted = indices.GetIsDeletedIndex(schema.Name);
-            isDeleted.Update(id, true);
-            indices.Upsert<bool>(isDeleted);
+            var isDeletedIndex = indices.GetIsDeletedIndex(schema.Name);
+            isDeletedIndex.Add(record.GetId(), true);
+            indices.Upsert(isDeletedIndex);
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();

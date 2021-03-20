@@ -18,7 +18,7 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         public void Initialize()
         {
             var mockSchemas = new Mock<SchemaRepository>();
-            var schema = new TableSchema("FOOD", new List<Column> { new Column(ColumnType.String, "NAME", size: 4) });
+            var schema = new TableSchema("FOOD", new List<Column> { new Column(DataTypes.String, "NAME", size: 4) });
             mockSchemas.Setup(schemas => schemas.GetSchema("FOOD")).Returns(schema);
             parser = new InsertRecordParser(mockSchemas.Object);
         }

@@ -37,7 +37,7 @@ namespace SharkBase.QueryProcessing.Parsing
             for (int i = 0; i < columns.Count(); i++)
             {
                 var column = columns.ElementAt(i);
-                if (columns.ElementAt(i).Type == ColumnType.String)
+                if (columns.ElementAt(i).Type == DataTypes.String)
                 {
                     updatedValues[i] = updatedValues[i].Length > column.Size ? updatedValues[i].Substring(0, column.Size) : updatedValues[i].PadRight(column.Size);
                 }

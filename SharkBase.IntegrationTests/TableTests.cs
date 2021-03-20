@@ -5,6 +5,7 @@ using SharkBase.DataAccess.Index;
 using SharkBase.DataAccess.Index.Repositories;
 using SharkBase.DataAccess.Schema.Repositories;
 using SharkBase.Models;
+using SharkBase.Models.Values;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -38,13 +39,13 @@ namespace SharkBase.IntegrationTests
             var tables = new Tables(store, mockIdGenerator.Object, new FileSchemas(store), new FileIndices(store), new List<string>());
             var columns = new List<Column>
             {
-                new Column(ColumnType.String, "NAME"),
-                new Column(ColumnType.Int64, "COST")
+                new Column(DataTypes.String, "NAME"),
+                new Column(DataTypes.Int64, "COST")
             };
             tables.Create(tableName, columns);
             this.table = tables.GetByName(tableName) as Table;
-            insertionRecord = new Record(new List<Value> { new Value("pizza"), new Value(9001L) });
-            expectedRecord = new Record(new List<Value> { new Value(guid.ToString()), new Value(false), new Value("pizza"), new Value(9001L) });
+            insertionRecord = new Record(new List<Value> { new StringValue("pizza"), new LongValue(9001L) });
+            expectedRecord = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new StringValue("pizza"), new LongValue(9001L) });
         }
 
         [TestCleanup]
@@ -87,9 +88,9 @@ namespace SharkBase.IntegrationTests
                 .Returns(Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f83"));
             var recordsToInsert = new List<Record> 
             { 
-                new Record(new List<Value> { new Value("Tacos"), new Value(5L) }), 
-                new Record(new List<Value> { new Value("pizza"), new Value(9L) }), 
-                new Record(new List<Value> { new Value("steak"), new Value(16L) })
+                new Record(new List<Value> { new StringValue("Tacos"), new LongValue(5L) }), 
+                new Record(new List<Value> { new StringValue("pizza"), new LongValue(9L) }), 
+                new Record(new List<Value> { new StringValue("steak"), new LongValue(16L) })
             };
             foreach (var rec in recordsToInsert)
             {
@@ -97,25 +98,14 @@ namespace SharkBase.IntegrationTests
             }
             var expectedRecords = new List<Record>
             {
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f81"), new Value(false), new Value("Tacos"), new Value(5L) }),
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f82"), new Value(false), new Value("pizza"), new Value(9L) }),
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f83"), new Value(false), new Value("steak"), new Value(16L) })
+                new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f81"), new StringValue("Tacos"), new LongValue(5L) }),
+                new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f82"), new StringValue("pizza"), new LongValue(9L) }),
+                new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f83"), new StringValue("steak"), new LongValue(16L) })
             };
 
             var actualRecords = table.ReadAllRecords();
 
             CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
-        }
-
-        [TestMethod]
-        public void WhenDeletingARecord_ItSetsItDeletedFieldToTrue()
-        {
-            table.InsertRecord(insertionRecord);
-            var insertedRecord = table.ReadRecord();
-
-            table.DeleteRecord(insertedRecord);
-
-            Assert.IsTrue(insertedRecord.IsDeleted());
         }
 
         [TestMethod]
@@ -127,9 +117,9 @@ namespace SharkBase.IntegrationTests
                             .Returns(Guid.Parse("6b7ad35b-8176-4139-9f60-fa5654412f83"));
             var recordsToInsert = new List<Record>
             {
-                new Record(new List<Value> { new Value("Tacos"), new Value(5L) }),
-                new Record(new List<Value> { new Value("pizza"), new Value(9L) }),
-                new Record(new List<Value> { new Value("steak"), new Value(16L) })
+                new Record(new List<Value> { new StringValue("Tacos"), new LongValue(5L) }),
+                new Record(new List<Value> { new StringValue("pizza"), new LongValue(9L) }),
+                new Record(new List<Value> { new StringValue("steak"), new LongValue(16L) })
             };
             foreach (var rec in recordsToInsert)
             {
@@ -139,8 +129,8 @@ namespace SharkBase.IntegrationTests
 
             var expectedRecords = new List<Record>
             {
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f81"), new Value(false), new Value("Tacos"), new Value(5L) }),
-                new Record(new List<Value> { new Value("6b7ad35b-8176-4139-9f60-fa5654412f83"), new Value(false), new Value("steak"), new Value(16L) })
+                new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f81"), new StringValue("Tacos"), new LongValue(5L) }),
+                new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f83"), new StringValue("steak"), new LongValue(16L) })
             };
 
             var actualRecords = table.ReadAllRecords();

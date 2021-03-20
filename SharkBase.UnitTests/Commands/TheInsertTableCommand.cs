@@ -17,8 +17,8 @@ namespace SharkBase.UnitTests.Commands
             var mockTables = new Mock<ITables>();
             var expectedColumnDefinitions = new List<Column>
             {
-                new Column(ColumnType.Int64, "ID"),
-                new Column(ColumnType.String, "NAME", size: 64)
+                new Column(DataTypes.Int64, "ID"),
+                new Column(DataTypes.String, "NAME", size: 64)
             };
             List<string> tokens = new List<string> { "INT64", "ID", "STRING", "NAME" };
             var statement = new InsertTableStatement(new Mock<IStatementValidator>().Object, "people", expectedColumnDefinitions);

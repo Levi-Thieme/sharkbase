@@ -14,8 +14,7 @@ namespace SharkBase.DataAccess.Schema.Repositories
         private readonly PhysicalStorage store;
         private readonly IEnumerable<Column> DefaultColumns = new List<Column>
         {
-            new Column(ColumnType.String, "ID", hasDefaultValue: true),
-            new Column(ColumnType.boolean, "DELETED", hasDefaultValue: true),
+            new Column(DataTypes.String, "ID", hasDefaultValue: true, size: Guid.NewGuid().ToString().Length),
         };
 
 

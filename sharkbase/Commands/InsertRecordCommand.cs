@@ -21,11 +21,11 @@ namespace SharkBase.Commands
             this.valueParser = valueParser;
         }
 
-
         public void Execute()
         {
             var values = valueParser.ParseColumnValues(statement.ColumnValues, schema.Columns.Where(c => !c.HasDefaultValue));
-            table.InsertRecord(new Record(values.Select(v => new Value(v))));
+            var recordToInsert = new Record(values);
+            table.InsertRecord(recordToInsert);
         }
     }
 }

@@ -71,7 +71,7 @@ namespace SharkBase.QueryProcessing.Parsing
                     int start = type.IndexOf("(") + 1;
                     int substringLength = type.IndexOf(")", start + 1) - start;
                     string length = type.Substring(start, substringLength);
-                    return new Column(ColumnType.String, name, size: int.Parse(length));
+                    return new Column(DataTypes.String, name, size: int.Parse(length));
                 }
                 catch (Exception)
                 {

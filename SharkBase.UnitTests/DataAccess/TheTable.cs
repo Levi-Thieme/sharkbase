@@ -4,6 +4,7 @@ using SharkBase.DataAccess;
 using SharkBase.DataAccess.Index;
 using SharkBase.DataAccess.Index.Models;
 using SharkBase.Models;
+using SharkBase.Models.Values;
 using SharkBase.SystemStorage;
 using System;
 using System.Collections.Generic;
@@ -155,7 +156,7 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItGetsThePrimaryIndex()
             {
-                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+                var record = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new LongValue(100L) });
 
                 table.DeleteRecord(record);
 
@@ -165,7 +166,7 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItGetsTheIsDeletedIndex()
             {
-                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+                var record = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new LongValue(100L) });
 
                 table.DeleteRecord(record);
 
@@ -175,7 +176,7 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItSetsTheRecordAsDeletedInTheIsDeletedIndex()
             {
-                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+                var record = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new LongValue(100L) });
 
                 table.DeleteRecord(record);
 
@@ -185,7 +186,7 @@ namespace SharkBase.UnitTests.DataAccess
             [TestMethod]
             public void ItUpsertsTheIsDeletedIndex()
             {
-                var record = new Record(new List<Value> { new Value(guid), new Value(false), new Value(100L) });
+                var record = new Record(new List<Value> { new StringValue(guid.ToString()), new BoolValue(false), new LongValue(100L) });
 
                 table.DeleteRecord(record);
 
