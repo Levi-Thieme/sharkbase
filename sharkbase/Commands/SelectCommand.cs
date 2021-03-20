@@ -19,21 +19,33 @@ namespace SharkBase.Commands
 
         public void Execute()
         {
-            var records = this.table.ReadAllRecords();
             if (statement.Tokens.Any())
             {
                 int columnIndex = table.Schema.Columns.ToList().FindIndex(c => c.Name == statement.Tokens.First());
                 var type = table.Schema.Columns.ElementAt(columnIndex).Type;
                 var value = new ValueParser().ParseValue(statement.Tokens.ElementAt(1), type);
-                records = records.Where(record => record.Values.ElementAt(columnIndex).Equals(value));
-            }
-            if (records.Any())
-            {
-                foreach (var record in records)
-                    Console.WriteLine(record.ToString());
+                using (var records = table.ReadAll())
+                {
+                    while (records.Read())
+                    {
+                        var current = records.Current;
+                        if (current.Values.ElementAt(columnIndex).Equals(value))
+                        {
+                            Console.WriteLine(current.ToString());
+                        }
+                    }
+                }
             }
             else
-                Console.WriteLine("No results found.");
+            {
+                using (var records = table.ReadAll())
+                {
+                    while (records.Read())
+                    {
+                        Console.WriteLine(records.Current.ToString());
+                    }
+                }
+            }
         }
     }
 }
