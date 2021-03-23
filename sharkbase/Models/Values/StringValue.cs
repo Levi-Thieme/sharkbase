@@ -7,25 +7,34 @@ namespace SharkBase.Models.Values
 {
     public class StringValue : Value
     {
-        public string value { get; private set; }
+        private string value = string.Empty;
+        public string Value { 
+            get { return value.Substring(0, length); }
+            private set { this.value = value; }
+        }
+        public int length { get; private set; }
 
         public StringValue()
         {
             value = string.Empty;
+            length = 0;
         }
 
         public StringValue(string value)
         {
             this.value = value;
+            length = value.Length;
         }
 
         public void Read(BinaryReader reader)
         {
+            this.length = reader.ReadInt32();
             this.value = reader.ReadString();
         }
 
         public void Write(BinaryWriter writer)
         {
+            writer.Write(length);
             writer.Write(value);
         }
 
@@ -36,7 +45,7 @@ namespace SharkBase.Models.Values
 
         public override bool Equals(object obj)
         {
-            return obj is StringValue other && this.value.Trim() == other.value.Trim();
+            return obj is StringValue other && this.Value == other.Value;
         }
     }
 }

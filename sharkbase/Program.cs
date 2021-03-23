@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace SharkBase
 {
@@ -10,7 +11,7 @@ namespace SharkBase
             {
                 using (var sharkBase = new Startup.SharkBase())
                 {
-                    sharkBase.Connect("C:/Users/Levi/AppData/Local/Temp/test_db");
+                    sharkBase.Connect($"{Path.GetTempPath()}/test_db");
                     string input = Console.ReadLine().Trim();
                     while (input.ToUpper() != "QUIT")
                     {

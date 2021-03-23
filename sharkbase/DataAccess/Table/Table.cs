@@ -47,7 +47,8 @@ namespace SharkBase.DataAccess
                         recordOffset = primaryIndex.GetValue(replacedRecordId);
                     }
                     stream.Seek(recordOffset, SeekOrigin.Begin);
-                    writer.Write(guid);
+                    var idValue = new StringValue(guid);
+                    idValue.Write(writer);
                     record.Write(writer);
                     primaryIndex.Add(guid, recordOffset);
                     if (replacedRecordId != string.Empty)
@@ -59,22 +60,6 @@ namespace SharkBase.DataAccess
                     indices.Upsert(isDeletedIndex);
                 }
             }
-        }
-
-        public Record ReadRecord()
-        {
-            Record record = null;
-            using (var stream = store.GetTableStream(schema.Name))
-            {
-                using (var reader = new BinaryReader(stream, Encoding.UTF8))
-                {
-                    if (reader.BaseStream.Position != reader.BaseStream.Length)
-                    {
-                        record = readRecordFromStream(reader);
-                    } 
-                }
-            }
-            return record;
         }
 
         public IEnumerable<Record> ReadAllRecords()

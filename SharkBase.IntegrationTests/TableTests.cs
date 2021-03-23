@@ -60,23 +60,7 @@ namespace SharkBase.IntegrationTests
             table.InsertRecord(insertionRecord);
 
             long length = new FileInfo(tablePath("test")).Length;
-            Assert.AreEqual(51, length);
-        }
-
-        [TestMethod]
-        public void ReadsARecord()
-        {
-            table.InsertRecord(insertionRecord);
-
-            var readRecord = table.ReadRecord();
-
-            Assert.AreEqual(expectedRecord, readRecord);
-        }
-
-        [TestMethod]
-        public void GivenNoRecordAreAvailable_WhenReadingARecord_ItReturnsNull()
-        {
-            Assert.IsNull(table.ReadRecord());
+            Assert.AreEqual(59, length);
         }
 
         [TestMethod]
