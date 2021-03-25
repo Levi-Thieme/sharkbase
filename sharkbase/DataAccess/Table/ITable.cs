@@ -13,5 +13,6 @@ namespace SharkBase.DataAccess
         Guid GetUniqueId();
         void DeleteRecords(IEnumerable<Record> records);
         void DeleteRecord(Record record);
+        void DeleteAllRecords();
     }
 }

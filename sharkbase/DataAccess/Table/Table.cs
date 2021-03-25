@@ -132,5 +132,14 @@ namespace SharkBase.DataAccess
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();
+
+        public void DeleteAllRecords()
+        {
+            using (var recordStream = ReadAll())
+            {
+                while (recordStream.Read())
+                    DeleteRecord(recordStream.Current);
+            }
+        }
     }
 }

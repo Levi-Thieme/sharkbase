@@ -87,9 +87,16 @@ namespace SharkBase.IntegrationTests
                 new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f83"), new StringValue("steak"), new LongValue(16L) })
             };
 
-            var actualRecords = table.ReadAllRecords();
-
-            CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
+            using (var records = table.ReadAll())
+            {
+                int index = 0;
+                while (records.Read())
+                {
+                    var currentRecord = records.Current;
+                    Assert.AreEqual(expectedRecords[index], currentRecord);
+                    index += 1;
+                }
+            }
         }
 
         [TestMethod]
@@ -117,9 +124,14 @@ namespace SharkBase.IntegrationTests
                 new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f83"), new StringValue("steak"), new LongValue(16L) })
             };
 
-            var actualRecords = table.ReadAllRecords();
+            var actualRecords = new List<Record>();
+            using (var recordStream = table.ReadAll())
+            {
+                while (recordStream.Read())
+                    actualRecords.Add(recordStream.Current);
+            }
 
-            CollectionAssert.AreEqual(expectedRecords, actualRecords.ToList());
+            CollectionAssert.AreEqual(expectedRecords, actualRecords);
         }
 
         private string tablePath(string name) => Path.Combine(databaseDirectory, name, $"{name}.table");
