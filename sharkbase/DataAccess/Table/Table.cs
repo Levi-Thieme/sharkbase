@@ -61,6 +61,31 @@ namespace SharkBase.DataAccess
             }
         }
 
+        public void InsertRecords(IEnumerable<Record> records)
+        {
+            var primaryIndex = indices.Get(schema.Name);
+            using (var tableStream = store.GetTableStream(schema.Name))
+            {
+                long tableOffset = tableStream.Length;
+                using (var memoryStream = new MemoryStream())
+                {
+                    using (var writer = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                    {
+                        foreach (var record in records)
+                        {
+                            long memoryOffset = memoryStream.Length;
+                            string guid = GetUniqueId().ToString();
+                            writer.Write(guid);
+                            record.Write(writer);
+                            primaryIndex.Add(guid, tableOffset + memoryOffset);
+                        }
+                    }
+                    memoryStream.WriteTo(tableStream);
+                }
+            }
+            indices.Upsert(primaryIndex);
+        }
+
         public Record ReadRecord()
         {
             Record record = null;
