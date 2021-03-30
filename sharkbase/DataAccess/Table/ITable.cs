@@ -8,11 +8,11 @@ namespace SharkBase.DataAccess
     {
         TableSchema Schema { get; }
         void InsertRecord(Record record);
-        Record ReadRecord();
         IEnumerable<Record> ReadAllRecords();
         Streamable<Record> ReadAll();
         Guid GetUniqueId();
         void DeleteRecords(IEnumerable<Record> records);
         void DeleteRecord(Record record);
+        void DeleteAllRecords();
     }
 }

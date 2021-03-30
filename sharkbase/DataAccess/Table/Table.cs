@@ -47,7 +47,8 @@ namespace SharkBase.DataAccess
                         recordOffset = primaryIndex.GetValue(replacedRecordId);
                     }
                     stream.Seek(recordOffset, SeekOrigin.Begin);
-                    writer.Write(guid);
+                    var idValue = new StringValue(guid);
+                    idValue.Write(writer);
                     record.Write(writer);
                     primaryIndex.Add(guid, recordOffset);
                     if (replacedRecordId != string.Empty)
@@ -172,5 +173,14 @@ namespace SharkBase.DataAccess
         }
 
         public Guid GetUniqueId() => this.idGenerator.GetUniqueId();
+
+        public void DeleteAllRecords()
+        {
+            using (var recordStream = ReadAll())
+            {
+                while (recordStream.Read())
+                    DeleteRecord(recordStream.Current);
+            }
+        }
     }
 }

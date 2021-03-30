@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using SharkBase.Models.Values;
+using SharkBase.DataAccess.Streaming;
 
 namespace SharkBase.UnitTests.Commands
 {
@@ -20,12 +21,13 @@ namespace SharkBase.UnitTests.Commands
         private Mock<ITable> mockTable;
         private DeleteRecordStatement statement;
         private List<Record> records;
+        private Mock<Streamable<Record>> mockRecordStream;
 
         [TestInitialize]
         public void Initialize()
         {
             statement = new DeleteRecordStatement("test", new List<string> { "ID", "4" }, new Mock<IStatementValidator>().Object);
-            var schema = new TableSchema("test", new List<Column> { new Column(DataTypes.Int64, "ID") });
+            var schema = new TableSchema("test", new List<Column> { new Column(DataTypes.String, "ID") });
             mockTable = new Mock<ITable>();
             mockTable.SetupGet(table => table.Schema).Returns(schema);
             command = new DeleteRecordCommand(statement, mockTable.Object);
@@ -34,7 +36,14 @@ namespace SharkBase.UnitTests.Commands
                 new Record(new List<Value> { new StringValue("4") }),
                 new Record(new List<Value> { new StringValue("5") })
             };
+            mockRecordStream = new Mock<Streamable<Record>>();
             mockTable.Setup(table => table.ReadAllRecords()).Returns(records);
+            mockTable.Setup(table => table.ReadAll()).Returns(mockRecordStream.Object);
+            mockRecordStream.SetupSequence(stream => stream.Read())
+                .Returns(true)
+                .Returns(false);
+            mockRecordStream.SetupGet(stream => stream.Current)
+                .Returns(records[0]);
         }
 
         [TestMethod]
@@ -42,7 +51,7 @@ namespace SharkBase.UnitTests.Commands
         {
             command.Execute();
 
-            mockTable.Verify(table => table.ReadAllRecords(), Times.Once);
+            mockTable.Verify(table => table.ReadAll(), Times.Once);
         }
 
         [TestMethod]
@@ -52,17 +61,17 @@ namespace SharkBase.UnitTests.Commands
 
             command.Execute();
 
-            mockTable.Verify(table => table.DeleteRecords(records), Times.Once);
+            mockTable.Verify(table => table.DeleteAllRecords(), Times.Once);
         }
 
         [TestMethod]
         public void WhenExecutedWithTokens_ItDeletesRecordsThatMatchTheWhereClause()
         {
-            var expectedRecords = records.Where(r => r.Values.First().Equals("4"));
+            var expectedRecord = records.First(r => r.Values.First().Equals(new StringValue("4")));
 
             command.Execute();
 
-            mockTable.Verify(table => table.DeleteRecords(expectedRecords));
+            mockTable.Verify(table => table.DeleteRecord(expectedRecord));
         }
     }
 }
