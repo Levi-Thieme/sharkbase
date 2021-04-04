@@ -1,5 +1,4 @@
 ﻿using SharkBase.DataAccess;
-using SharkBase.Models;
 using SharkBase.Parsing;
 using SharkBase.QueryProcessing.Statements;
 using System.Linq;

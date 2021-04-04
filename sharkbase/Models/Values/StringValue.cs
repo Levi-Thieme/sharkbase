@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace SharkBase.Models.Values
 {
@@ -9,33 +6,44 @@ namespace SharkBase.Models.Values
     {
         private string value = string.Empty;
         public string Value { 
-            get { return value.Substring(0, length); }
+            get { return value.Substring(0, Length); }
             private set { this.value = value; }
         }
-        public int length { get; private set; }
-
-        public StringValue()
-        {
-            value = string.Empty;
-            length = 0;
-        }
+        public int Length { get; private set; }
+        public int MaxLength { get; private set; }
 
         public StringValue(string value)
         {
             this.value = value;
-            length = value.Length;
+            Length = value.Length;
+            MaxLength = value.Length;
+        }
+
+        public StringValue(string value, int maxLength)
+        {
+            this.value = value;
+            Length = value.Length;
+            MaxLength = maxLength;
+        }
+
+        public StringValue()
+        {
+            value = string.Empty;
+            Length = 0;
+            MaxLength = 0;
         }
 
         public void Read(BinaryReader reader)
         {
-            this.length = reader.ReadInt32();
+            this.Length = reader.ReadInt32();
             this.value = reader.ReadString();
+            this.MaxLength = this.value.Length;
         }
 
         public void Write(BinaryWriter writer)
         {
-            writer.Write(length);
-            writer.Write(value);
+            writer.Write(Length);
+            writer.Write(Value.PadRight(MaxLength));
         }
 
         public override string ToString()
