@@ -35,5 +35,10 @@ namespace SharkBase.Models.Values
         {
             return obj is BoolValue other && this.value == other.value;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() + value.GetHashCode();
+        }
     }
 }

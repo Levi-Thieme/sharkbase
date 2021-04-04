@@ -177,10 +177,8 @@ namespace SharkBase.DataAccess
         public void DeleteAllRecords()
         {
             using (var recordStream = ReadAll())
-            {
-                while (recordStream.Read())
-                    DeleteRecord(recordStream.Current);
-            }
+                foreach (var record in recordStream)
+                    DeleteRecord(record);
         }
     }
 }

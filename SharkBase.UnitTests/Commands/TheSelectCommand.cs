@@ -3,6 +3,7 @@ using Moq;
 using SharkBase.Commands;
 using SharkBase.DataAccess;
 using SharkBase.DataAccess.Streaming;
+using SharkBase.Models.Values;
 using SharkBase.QueryProcessing.Statements;
 using SharkBase.QueryProcessing.Validation;
 using System.Collections.Generic;
@@ -19,6 +20,8 @@ namespace SharkBase.UnitTests.Commands
         public void Initialize()
         {
             this.mockRecordStream = new Mock<Streamable<Record>>();
+            var records = new List<Record>();
+            this.mockRecordStream.Setup(stream => stream.GetEnumerator()).Returns(records.GetEnumerator());
             this.mockTable = new Mock<ITable>();
             this.mockTable.Setup(table => table.ReadAll()).Returns(this.mockRecordStream.Object);
         }

@@ -47,5 +47,10 @@ namespace SharkBase.Models.Values
         {
             return obj is StringValue other && this.Value == other.Value;
         }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
+        }
     }
 }

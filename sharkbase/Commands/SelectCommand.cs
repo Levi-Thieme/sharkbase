@@ -26,7 +26,7 @@ namespace SharkBase.Commands
                 var value = new ValueParser().ParseValue(statement.Tokens.ElementAt(1), type);
                 using (var records = table.ReadAll())
                 {
-                    while (records.Read())
+                    foreach (var record in records)
                     {
                         var current = records.Current;
                         if (current.Values.ElementAt(columnIndex).Equals(value))
@@ -40,9 +40,9 @@ namespace SharkBase.Commands
             {
                 using (var records = table.ReadAll())
                 {
-                    while (records.Read())
+                    foreach (var record in records)
                     {
-                        Console.WriteLine(records.Current.ToString());
+                        Console.WriteLine(record.ToString());
                     }
                 }
             }

@@ -39,11 +39,7 @@ namespace SharkBase.UnitTests.Commands
             mockRecordStream = new Mock<Streamable<Record>>();
             mockTable.Setup(table => table.ReadAllRecords()).Returns(records);
             mockTable.Setup(table => table.ReadAll()).Returns(mockRecordStream.Object);
-            mockRecordStream.SetupSequence(stream => stream.Read())
-                .Returns(true)
-                .Returns(false);
-            mockRecordStream.SetupGet(stream => stream.Current)
-                .Returns(records[0]);
+            mockRecordStream.Setup(stream => stream.GetEnumerator()).Returns(this.records.GetEnumerator());
         }
 
         [TestMethod]

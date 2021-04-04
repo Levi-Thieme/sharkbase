@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SharkBase.DataAccess.Streaming
 {
-    public interface Streamable<T> : IDisposable
-    {
-        T Current { get; }
-        bool Read();
-    }
+    public interface Streamable<T> : IEnumerator<T>, IEnumerable<T>, IDisposable
+    { }
 }
