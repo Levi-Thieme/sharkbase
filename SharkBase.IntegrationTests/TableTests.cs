@@ -90,10 +90,9 @@ namespace SharkBase.IntegrationTests
             using (var records = table.ReadAll())
             {
                 int index = 0;
-                while (records.Read())
+                foreach (var record in records)
                 {
-                    var currentRecord = records.Current;
-                    Assert.AreEqual(expectedRecords[index], currentRecord);
+                    Assert.AreEqual(expectedRecords[index], record);
                     index += 1;
                 }
             }
@@ -124,12 +123,7 @@ namespace SharkBase.IntegrationTests
                 new Record(new List<Value> { new StringValue("6b7ad35b-8176-4139-9f60-fa5654412f83"), new StringValue("steak"), new LongValue(16L) })
             };
 
-            var actualRecords = new List<Record>();
-            using (var recordStream = table.ReadAll())
-            {
-                while (recordStream.Read())
-                    actualRecords.Add(recordStream.Current);
-            }
+            var actualRecords = table.ReadAllRecords().ToList();
 
             CollectionAssert.AreEqual(expectedRecords, actualRecords);
         }

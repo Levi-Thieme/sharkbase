@@ -3,7 +3,6 @@ using SharkBase.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SharkBase.QueryProcessing.Validation
 {
@@ -20,7 +19,7 @@ namespace SharkBase.QueryProcessing.Validation
                 throw new ArgumentException($"The column, {tokens.ElementAt(0)}, does not exist in the table {schema.Name}");
             try
             {
-                new ValueParser().ParseValue(tokens.ElementAt(1), column.Type);
+                new ValueParser().ParseValue(tokens.ElementAt(1), column);
             }
             catch (FormatException)
             {

@@ -70,26 +70,5 @@ namespace SharkBase.UnitTests.QueryProcessing.Parsing
         {
             Assert.ThrowsException<ArgumentException>(() => parser.Parse("INSERT INTO FOOD 1 TACOS' 30"));
         }
-
-        [TestMethod]
-        public void ItTruncatesStringsToFitInTheirColumn()
-        {
-            var expected = new List<string> { "taco" };
-
-            var statement = parser.Parse("INSERT INTO FOOD tacos");
-
-            CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
-
-        }
-
-        [TestMethod]
-        public void ItPadsStringsToFitInTheirColumn()
-        {
-            var expected = new List<string> { "ta  " };
-
-            var statement = parser.Parse("INSERT INTO FOOD ta");
-
-            CollectionAssert.AreEqual(expected, statement.Tokens.ToList());
-        }
     }
 }

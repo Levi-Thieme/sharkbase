@@ -22,11 +22,11 @@ namespace SharkBase.Commands
             if (statement.Tokens.Any())
             {
                 int columnIndex = table.Schema.Columns.ToList().FindIndex(c => c.Name == statement.Tokens.First());
-                var type = table.Schema.Columns.ElementAt(columnIndex).Type;
-                var value = new ValueParser().ParseValue(statement.Tokens.ElementAt(1), type);
+                var column = table.Schema.Columns.ElementAt(columnIndex);
+                var value = new ValueParser().ParseValue(statement.Tokens.ElementAt(1), column);
                 using (var records = table.ReadAll())
                 {
-                    while (records.Read())
+                    foreach (var record in records)
                     {
                         var current = records.Current;
                         if (current.Values.ElementAt(columnIndex).Equals(value))
@@ -40,9 +40,9 @@ namespace SharkBase.Commands
             {
                 using (var records = table.ReadAll())
                 {
-                    while (records.Read())
+                    foreach (var record in records)
                     {
-                        Console.WriteLine(records.Current.ToString());
+                        Console.WriteLine(record.ToString());
                     }
                 }
             }

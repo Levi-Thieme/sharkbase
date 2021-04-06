@@ -62,6 +62,47 @@ namespace SharkBase.DataAccess
             }
         }
 
+        public void InsertRecords(IEnumerable<Record> records)
+        {
+            var primaryIndex = indices.Get(schema.Name);
+            using (var tableStream = store.GetTableStream(schema.Name))
+            {
+                long tableOffset = tableStream.Length;
+                using (var memoryStream = new MemoryStream())
+                {
+                    using (var writer = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                    {
+                        foreach (var record in records)
+                        {
+                            long memoryOffset = memoryStream.Length;
+                            string guid = GetUniqueId().ToString();
+                            writer.Write(guid);
+                            record.Write(writer);
+                            primaryIndex.Add(guid, tableOffset + memoryOffset);
+                        }
+                    }
+                    memoryStream.WriteTo(tableStream);
+                }
+            }
+            indices.Upsert(primaryIndex);
+        }
+
+        public Record ReadRecord()
+        {
+            Record record = null;
+            using (var stream = store.GetTableStream(schema.Name))
+            {
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
+                {
+                    if (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        record = readRecordFromStream(reader);
+                    } 
+                }
+            }
+            return record;
+        }
+
         public IEnumerable<Record> ReadAllRecords()
         {
             var isDeletedIndex = indices.GetIsDeletedIndex(schema.Name);
@@ -136,10 +177,8 @@ namespace SharkBase.DataAccess
         public void DeleteAllRecords()
         {
             using (var recordStream = ReadAll())
-            {
-                while (recordStream.Read())
-                    DeleteRecord(recordStream.Current);
-            }
+                foreach (var record in recordStream)
+                    DeleteRecord(record);
         }
     }
 }

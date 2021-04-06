@@ -11,7 +11,7 @@ namespace SharkBase.Parsing
         public long ParseInt(string value);
         public string ParseString(string value);
         public bool ParseBoolean(string value);
-        public Value ParseValue(string value, DataTypes type);
+        public Value ParseValue(string value, Column column);
         public IEnumerable<Value> ParseColumnValues(IEnumerable<string> columnValues, IEnumerable<Column> tableColumns);
     }
 
@@ -32,13 +32,13 @@ namespace SharkBase.Parsing
             return bool.Parse(value);
         }
 
-        public Value ParseValue(string value, DataTypes type)
+        public Value ParseValue(string value, Column column)
         {
-            if (type == DataTypes.Int64)
+            if (column.Type == DataTypes.Int64)
                 return new LongValue(ParseInt(value));
-            else if (type == DataTypes.String)
-                return new StringValue(ParseString(value));
-            else if (type == DataTypes.boolean)
+            else if (column.Type == DataTypes.String)
+                return new StringValue(ParseString(value), column.Size);
+            else if (column.Type == DataTypes.boolean)
                 return new BoolValue(ParseBoolean(value));
             throw new ArgumentException("The column type did not correspond to an existing column type.");
         }
@@ -50,7 +50,7 @@ namespace SharkBase.Parsing
             foreach (var (column, value) in tableColumns.Zip(columnValues)) {
                 try
                 {
-                    values.Add(parser.ParseValue(value, column.Type));
+                    values.Add(parser.ParseValue(value, column));
                 }
                 catch (FormatException)
                 {
