@@ -44,6 +44,10 @@ namespace SharkBase.Commands
             {
                 return new DeleteRecordCommand(deleteRecordStatement, tables.GetByName(deleteRecordStatement.Table));
             }
+            else if (statement is UpdateRecordStatement updateRecordStatement)
+            {
+                return new UpdateRecordCommand(updateRecordStatement, tables.GetByName(updateRecordStatement.Table));
+            }
             throw new ArgumentException("The provided statement does not correspond to an existing Command.");
         }
     }

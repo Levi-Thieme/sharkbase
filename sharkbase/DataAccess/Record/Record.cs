@@ -16,6 +16,11 @@ namespace SharkBase.DataAccess
             Values = values;
         }
 
+        public Record(Record updatedRecord)
+        {
+            this.Values = updatedRecord.Values.ToArray();
+        }
+
         public Record(List<Value> values)
         {
             Values = values;

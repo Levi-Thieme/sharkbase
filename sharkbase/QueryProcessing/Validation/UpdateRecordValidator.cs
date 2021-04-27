@@ -47,7 +47,7 @@ namespace SharkBase.QueryProcessing.Validation
             {
                 try
                 {
-                    valueParser.ParseValue(value, column.Type);
+                    valueParser.ParseValue(value, column);
                 }
                 catch (Exception)
                 {

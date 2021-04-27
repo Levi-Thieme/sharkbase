@@ -14,5 +14,6 @@ namespace SharkBase.DataAccess
         void DeleteRecords(IEnumerable<Record> records);
         void DeleteRecord(Record record);
         void DeleteAllRecords();
+        void UpdateRecords(IEnumerable<Record> record);
     }
 }

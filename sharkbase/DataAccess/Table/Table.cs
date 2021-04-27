@@ -180,5 +180,22 @@ namespace SharkBase.DataAccess
                 foreach (var record in recordStream)
                     DeleteRecord(record);
         }
+
+        public void UpdateRecords(IEnumerable<Record> records)
+        {
+            var index = indices.Get(this.schema.Name);
+            using (var stream = store.GetTableStream(schema.Name))
+            {
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8))
+                {
+                    foreach (var record in records)
+                    {
+                        long offset = index.Indices[record.GetId()];
+                        writer.BaseStream.Seek(offset, SeekOrigin.Begin);
+                        record.Write(writer);
+                    }
+                }
+            }
+        }
     }
 }

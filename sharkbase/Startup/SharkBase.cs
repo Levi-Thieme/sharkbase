@@ -68,6 +68,7 @@ namespace SharkBase.Startup
             parsers.Add(new InsertRecordParser(this.schemas));
             parsers.Add(new SelectParser(this.schemas));
             parsers.Add(new DeleteRecordParser(this.schemas));
+            parsers.Add(new UpdateRecordParser());
             return new Parser(parsers);
         }
 

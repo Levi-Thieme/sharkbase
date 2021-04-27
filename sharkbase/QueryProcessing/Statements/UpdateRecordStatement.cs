@@ -1,4 +1,5 @@
 ﻿using SharkBase.Models.Values;
+using SharkBase.QueryProcessing.Validation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -32,9 +33,6 @@ namespace SharkBase.QueryProcessing.Statements
             Tokens = new List<string>();
         }
 
-        public void Validate()
-        {
-            throw new NotImplementedException();
-        }
+        public void Validate() { }
     }
 }

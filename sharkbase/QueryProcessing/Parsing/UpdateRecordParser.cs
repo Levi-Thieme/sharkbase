@@ -22,14 +22,14 @@ namespace SharkBase.QueryProcessing.Parsing
             }
             string table = tokens[1];
             string column = tokens[3];
-            string value = tokens[4];
+            string value = tokens[4].Replace("'", "");
             if (tokens.Length == 5)
             {
                 return new UpdateRecordStatement(table, column, value);
             }
-            else if (tokens.Length == 8 && tokens[5] == "WHERE")
+            else if (tokens.Length >= 8)
             {
-                var whereClauseTokens = parseWhereClause(tokens.Skip(6)).ToArray();
+                var whereClauseTokens = parseWhereClause(tokens.SkipWhile(token => token != "WHERE")).Skip(1).ToArray();
                 return new UpdateRecordStatement(table, column, value, whereClauseTokens[0], whereClauseTokens[1]);
             }
             else
